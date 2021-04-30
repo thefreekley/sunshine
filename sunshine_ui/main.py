@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # This Python file uses the following encoding: utf-8
 import sys
 import os
@@ -90,3 +91,23 @@ if __name__ == "__main__":
     if not engine.rootObjects():
         sys.exit(-1)
     sys.exit(app.exec_())
+
+    
+=======
+# This Python file uses the following encoding: utf-8
+import sys
+import os
+
+from PySide2.QtGui import QGuiApplication
+from PySide2.QtQml import QQmlApplicationEngine
+
+
+if __name__ == "__main__":
+    app = QGuiApplication(sys.argv)
+    engine = QQmlApplicationEngine()
+    engine.load(os.path.join(os.path.dirname(__file__), "qml/main.qml"))
+
+    if not engine.rootObjects():
+        sys.exit(-1)
+    sys.exit(app.exec_())
+>>>>>>> 1908d5085b5c7fa609bf5d5290d48da0eaceae9d
