@@ -6,14 +6,14 @@ import QtQuick.Templates 2.0 as T
 
 Item{
     property string textLabel: "value"
-    width: 200
-    height: 42
+    width: 210
+    height: 55
 
     id: root
     Rectangle {
 
         id:rectangle_lable
-        width: 200
+        width: 210
         height: 42
         color: "#9a4268"
         radius: 20
@@ -24,7 +24,7 @@ Item{
             y: 21
             color: "#ffffff"
             text: qsTr(root.textLabel)
-            font.pointSize: 13
+            font.pointSize: 11
             anchors.centerIn: parent
             FontLoader {
                 id: bebasFont1
