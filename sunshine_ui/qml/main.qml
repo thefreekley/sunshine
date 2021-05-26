@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtGraphicalEffects 1.15
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Styles 1.15
+import QtQuick.Templates 2.0 as T
 
 Window {
     width: 1000
@@ -89,9 +89,9 @@ Window {
                     width: 50
                     height: 50
                     color: "on"
-                    imageSource: "../images/off.png"
-                     x_value: 0
-                     y_value: 140
+                    imageSource: "../images/icon/off.png"
+                    x_value: 0
+                    y_value: 140
 
                 }
 
@@ -100,9 +100,9 @@ Window {
                     width: 50
                     height: 50
                     color: "on"
-                    imageSource: "../images/music.png"
-                     x_value: -100
-                     y_value: 110
+                    imageSource: "../images/icon/music.png"
+                    x_value: -100
+                    y_value: 110
 
                 }
 
@@ -112,9 +112,9 @@ Window {
                     width: 50
                     height: 50
                     color: "on"
-                    imageSource: "../images/music.png"
-                     x_value: 100
-                     y_value: 110
+                    imageSource: "../images/icon/music.png"
+                    x_value: 100
+                    y_value: 110
 
                 }
                 RoundButtonImg  {
@@ -122,9 +122,9 @@ Window {
                     width: 50
                     height: 50
                     color: "on"
-                    imageSource: "../images/paint.png"
-                     x_value: 150
-                     y_value: 20
+                    imageSource: "../images/icon/paint.png"
+                    x_value: 150
+                    y_value: 20
 
                 }
 
@@ -133,42 +133,103 @@ Window {
                     width: 50
                     height: 50
                     color: "on"
-                    imageSource: "../images/magic-wand.png"
+                    imageSource: "../images/icon/magic-wand.png"
                     x_value: -150
                     y_value: 20
 
+                }
+                RectangleLabel {
+                    textLabel: "ON"
                 }
             }
 
             Rectangle {
                 id: rectangle4
-                y: 349
-                height: 220
+                y: 342
+                height: 227
                 color: "#00000000"
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                anchors.leftMargin: 0
-                anchors.rightMargin: 0
                 anchors.bottomMargin: 0
+                anchors.rightMargin: 0
+                anchors.leftMargin: 0
 
-                Slider {
+                Rectangle {
+                    id: rectangle5
+                    y: 8
+                    height: 200
+                    width:400
+                    color: "#00000000"
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     anchors.centerIn: parent
-                    style: SliderStyle {
-                        groove: Rectangle {
-                            implicitWidth: 200
-                            implicitHeight: 8
-                            color: "gray"
-                            radius: 8
-                        }
+
+                    T.Slider {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        id: controlLight
+                        x: 90
+                        y: 41
+                        implicitWidth: 300
+                        implicitHeight: 26
+
                         handle: Rectangle {
-                            anchors.centerIn: parent
-                            color: control.pressed ? "white" : "lightgray"
-                            border.color: "gray"
-                            border.width: 2
-                            implicitWidth: 34
-                            implicitHeight: 34
-                            radius: 12
+                            x: controlLight.visualPosition * (controlLight.width - width)
+                            y: (controlLight.height - height) / 2
+                            width: 14
+                            height: 14
+
+                            radius: 7
+                            color: controlLight.pressed ? "#f0f0f0" : "#f6f6f6"
+                            border.color: UIStyle.colorQtGray7
+                        }
+
+                        background: Rectangle {
+                            y: (controlLight.height - height) / 2
+                            height: 16
+                            radius: 8
+                            color: UIStyle.colorQtGray3
+
+                            Rectangle {
+                                width: controlLight.visualPosition * parent.width
+                                height: parent.height
+                                color: "#ff6860"
+                                radius: 7
+                            }
+                        }
+                    }
+
+                    T.Slider {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        id: controlMusic
+                        y: 0
+
+                        implicitWidth: 300
+                        implicitHeight: 26
+
+                        handle: Rectangle {
+                            x: controlMusic.visualPosition * (controlMusic.width - width)
+                            y: (controlMusic.height - height) / 2
+                            width: 14
+                            height: 14
+
+                            radius: 7
+                            color: controlMusic.pressed ? "#f0f0f0" : "#f6f6f6"
+                            border.color: UIStyle.colorQtGray7
+                        }
+
+                        background: Rectangle {
+                            y: (controlMusic.height - height) / 2
+                            height: 14
+                            radius: 7
+                            color: UIStyle.colorQtGray3
+
+                            Rectangle {
+                                width: controlMusic.visualPosition * parent.width
+                                height: parent.height
+                                color: "#ff6860"
+                                radius: 7
+                            }
                         }
                     }
                 }
@@ -181,124 +242,119 @@ Window {
 
 
 
-
-
-
-                    }
-
-            }
-
-
-        Rectangle {
-            id: rectangle1
-            height: 42
-
-            color:  "#9a4268"
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.rightMargin: 5
-            anchors.leftMargin: 5
-            anchors.topMargin: 10
-            radius: 20
-
-            Label {
-                FontLoader {
-                    id: superionFont
-                    source: "../font/Superion 400.otf"
-                }
-
-                id: labelTitle
-                x: 420
-                y: 21
-                color: "#ffffff"
-                text: qsTr("Sunshine")
-                font.pointSize: 13
-                anchors.centerIn: parent
-                font.family: superionFont.name
-
-                ColorOverlay {
-                       id: imageRoundButtonColor
-                       anchors.fill: imageRoundButton
-                       source: imageRoundButton
-                       color: "#ffffff"  // make image like it lays under red glass
-                   }
-
-                MouseArea {
-                    hoverEnabled: true
-                    anchors.fill: parent
-                    onEntered: {
-                        labelTitle.state = "PRESSED"
-                        labelUp.start()
-                        imageRoundButtonColor.color = "red"
-
-                    }
-                    onExited: {
-                        labelDown.start()
-                        labelTitle.state = "RELEASED"
-                    }
-
-                }
-
-
-
-
-                NumberAnimation
-                {
-                    id: labelUp
-                    target: labelTitle
-                    property: "font.pointSize"
-                    to: 15;
-                    duration: 50
-                }
-                NumberAnimation
-                {
-                    id: labelDown
-                    target: labelTitle
-                    property: "font.pointSize"
-                    to: 13;
-                    duration:  50
-                }
-
-
-                states: [
-                    State {
-                        name: "PRESSED"
-                        PropertyChanges { target: labelTitle; color: "#ffea00"}
-
-                    },
-                    State {
-                        name: "RELEASED"
-                        PropertyChanges { target: labelTitle; color: "white"}
-
-                    }
-                ]
-
-                transitions: [
-                    Transition {
-                        from: "PRESSED"
-                        to: "RELEASED"
-                        ColorAnimation { target: labelTitle; duration: 100}
-
-
-                    },
-                    Transition {
-                        from: "RELEASED"
-                        to: "PRESSED"
-                        ColorAnimation { target: labelTitle; duration: 100}
-                    }
-
-
-                ]
-
-
-
-
-
-            }
 
         }
+
     }
+
+
+    Rectangle {
+        id: rectangle1
+        height: 42
+
+        color:  "#9a4268"
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.rightMargin: 5
+        anchors.leftMargin: 5
+        anchors.topMargin: 10
+        radius: 20
+
+        Label {
+            FontLoader {
+                id: superionFont
+                source: "../font/Superion 400.otf"
+            }
+
+            id: labelTitle
+            x: 420
+            y: 21
+            color: "#ffffff"
+            text: qsTr("Sunshine")
+            font.pointSize: 13
+            anchors.centerIn: parent
+            font.family: superionFont.name
+
+
+
+            MouseArea {
+                hoverEnabled: true
+                anchors.fill: parent
+                onEntered: {
+                    labelTitle.state = "PRESSED"
+                    labelUp.start()
+                    imageRoundButtonColor.color = "red"
+
+                }
+                onExited: {
+                    labelDown.start()
+                    labelTitle.state = "RELEASED"
+                }
+
+            }
+
+
+
+
+            NumberAnimation
+            {
+                id: labelUp
+                target: labelTitle
+                property: "font.pointSize"
+                to: 15;
+                duration: 50
+            }
+            NumberAnimation
+            {
+                id: labelDown
+                target: labelTitle
+                property: "font.pointSize"
+                to: 13;
+                duration:  50
+            }
+
+
+            states: [
+                State {
+                    name: "PRESSED"
+                    PropertyChanges { target: labelTitle; color: "#ffea00"}
+
+                },
+                State {
+                    name: "RELEASED"
+                    PropertyChanges { target: labelTitle; color: "white"}
+
+                }
+            ]
+
+            transitions: [
+                Transition {
+                    from: "PRESSED"
+                    to: "RELEASED"
+                    ColorAnimation { target: labelTitle; duration: 100}
+
+
+                },
+                Transition {
+                    from: "RELEASED"
+                    to: "PRESSED"
+                    ColorAnimation { target: labelTitle; duration: 100}
+                }
+
+
+            ]
+
+
+
+
+
+        }
+
+    }
+}
+
+
 
 
 
