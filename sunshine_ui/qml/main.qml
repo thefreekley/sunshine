@@ -22,6 +22,7 @@ Window {
     }
 
 
+
     Rectangle {
         id: rectangle
         color: "#7a3452"
@@ -93,7 +94,7 @@ Window {
                     id: iconOff
                     width: 50
                     height: 50
-                    color: "on"
+                    troggle: "on"
                     imageSource: "../images/icon/off.png"
                     x_value: 0
                     y_value: 140
@@ -104,7 +105,7 @@ Window {
                     id: iconMusic
                     width: 50
                     height: 50
-                    color: "on"
+                    troggle: "off"
                     imageSource: "../images/icon/music.png"
                     x_value: -100
                     y_value: 110
@@ -113,10 +114,10 @@ Window {
 
 
                 RoundButtonImg  {
-                    id: iconLight
+                    id: sleepLight
                     width: 50
                     height: 50
-                    color: "on"
+                    troggle: "off"
                     imageSource: "../images/icon/sleep.png"
                     x_value: 100
                     y_value: 110
@@ -126,7 +127,7 @@ Window {
                     id: painLight
                     width: 50
                     height: 50
-                    color: "on"
+                    troggle: "off"
                     imageSource: "../images/icon/paint.png"
                     x_value: 150
                     y_value: 20
@@ -137,7 +138,7 @@ Window {
                     id: wandLight
                     width: 50
                     height: 50
-                    color: "on"
+                    troggle: "on"
                     imageSource: "../images/icon/magic-wand.png"
                     x_value: -150
                     y_value: 20
@@ -375,7 +376,7 @@ Window {
                             title: qsTr("choose the color")
                             onAccepted: {
                                 gradientPaintTop.restart()
-                               gradientPaintBottom.restart()
+                                gradientPaintBottom.restart()
                                 gradientPaintMiddle.restart()
                             }
                             color: "#c60100"
@@ -528,7 +529,7 @@ Window {
                         id: treeButton
                         width: 50
                         height: 50
-                        color: "off"
+                        troggle: "off"
                         anchors.left: parent.left
                         anchors.top: parent.top
                         anchors.leftMargin: 0
@@ -713,16 +714,24 @@ Window {
                         anchors.top: parent.top
                         anchors.topMargin: 128
                         SmallButtonLight {
+                            id: lightButton1
                             imageSource: "../images/light/1.png"
+                            troggle: "on"
                         }
                         SmallButtonLight {
+                            id: lightButton2
                             imageSource: "../images/light/2.png"
+                            troggle: "off"
                         }
                         SmallButtonLight {
+                            id: lightButton3
                             imageSource: "../images/light/3.png"
+                            troggle: "off"
                         }
                         SmallButtonLight {
+                            id: lightButton4
                             imageSource: "../images/light/4.png"
+                            troggle: "off"
                         }
                     }
 
@@ -734,17 +743,24 @@ Window {
                         anchors.topMargin: 170
 
                         SmallButtonMusic {
+                            id: smallButtonMusic1
                             imageSource: "../images/music/1.png"
-                            troggle: "on"
+                            troggle: "off"
                         }
                         SmallButtonMusic {
+                            id: smallButtonMusic2
                             imageSource: "../images/music/2.png"
+                            troggle: "off"
                         }
                         SmallButtonMusic {
+                            id: smallButtonMusic3
                             imageSource: "../images/music/3.png"
+                            troggle: "off"
                         }
                         SmallButtonMusic {
+                            id: smallButtonMusic4
                             imageSource: "../images/music/4.png"
+                            troggle: "off"
                         }
                     }
 
@@ -756,19 +772,27 @@ Window {
                         anchors.top: parent.top
                         anchors.topMargin: 170
                         SmallButtonMusic {
+                            id: smallButtonMusic5
                             imageSource: "../images/music/5.png"
+                            troggle: "off"
                         }
 
                         SmallButtonMusic {
+                            id: smallButtonMusic6
                             imageSource: "../images/music/6.png"
+                            troggle: "off"
                         }
 
                         SmallButtonMusic {
+                            id: smallButtonMusic7
                             imageSource: "../images/music/7.png"
+                            troggle: "off"
                         }
 
                         SmallButtonMusic {
+                            id: smallButtonMusic8
                             imageSource: "../images/music/8.png"
+                            troggle: "off"
                         }
                     }
 
@@ -811,6 +835,18 @@ Window {
                         fillMode: Image.PreserveAspectFit
                         anchors.topMargin: -25
                     }
+                }
+
+                Row {
+                    id: row5
+                    x: 803
+                    width: 308
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.topMargin: 0
+                    anchors.bottomMargin: 42
+                    anchors.rightMargin: 39
                 }
             }
 
@@ -996,64 +1032,90 @@ Window {
             anchors.fill: parent
             anchors.rightMargin: 96
 
-                   onPressed: {
-                       previousX = mouseX
-                       previousY = mouseY
-                   }
+            onPressed: {
+                previousX = mouseX
+                previousY = mouseY
+            }
 
-                   onMouseXChanged: {
-                       var dx = mouseX - previousX
-                       aplicationWindow.setX(aplicationWindow.x + dx)
-                   }
+            onMouseXChanged: {
+                var dx = mouseX - previousX
+                aplicationWindow.setX(aplicationWindow.x + dx)
+            }
 
-                   onMouseYChanged: {
-                       var dy = mouseY - previousY
-                       aplicationWindow.setY(aplicationWindow.y + dy)
-                   }
+            onMouseYChanged: {
+                var dy = mouseY - previousY
+                aplicationWindow.setY(aplicationWindow.y + dy)
+            }
 
-               }
+        }
 
-           }
-
-           MouseArea {
-               width: 5
-
-               anchors {
-                   right: parent.right
-                   top: parent.top
-                   bottom: parent.bottom
-               }
-
-               cursorShape: Qt.SizeHorCursor
-
-               onPressed: previousX = mouseX
-
-               onMouseXChanged: {
-                   var dx = mouseX - previousX
-                   aplicationWindow.setWidth(parent.width + dx)
-               }
-
-           }
-
-           MouseArea {
-               height: 5
-               anchors {
-                   top: parent.top
-                   left: parent.left
-                   right: parent.right
-               }
-
-               cursorShape: Qt.SizeVerCursor
-
-               onPressed: previousY = mouseY
-
-               onMouseYChanged: {
-                   var dy = mouseY - previousY
-                   aplicationWindow.setY(aplicationWindow.y + dy)
-                   aplicationWindow.setHeight(aplicationWindow.height - dy)
-
-               }
     }
+
+    MouseArea {
+        width: 5
+
+        anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+        }
+
+        cursorShape: Qt.SizeHorCursor
+
+        onPressed: previousX = mouseX
+
+        onMouseXChanged: {
+            var dx = mouseX - previousX
+            aplicationWindow.setWidth(parent.width + dx)
+        }
+
+    }
+
+    Rectangle {
+        id: footer
+        y: 639
+        height: 15
+        color: "#9a4268"
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 0
+        anchors.leftMargin: 5
+        anchors.rightMargin: 5
+
+        Label {
+            font.family: bebasRegularFont
+              anchors.centerIn: parent
+              font.pointSize: 9
+            id: label4
+            color:"white"
+            width: 73
+            height: 13
+            text: qsTr("TFK 2021")
+            horizontalAlignment: Text.AlignHCenter
+        }
+    }
+
+    MouseArea {
+        height: 5
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+
+        cursorShape: Qt.SizeVerCursor
+
+        onPressed: previousY = mouseY
+
+        onMouseYChanged: {
+            var dy = mouseY - previousY
+            aplicationWindow.setY(aplicationWindow.y + dy)
+            aplicationWindow.setHeight(aplicationWindow.height - dy)
+
+        }
+    }
+
 }
 
 

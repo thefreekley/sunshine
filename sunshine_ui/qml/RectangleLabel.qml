@@ -27,7 +27,7 @@ Item{
             y: 21
             color: "#ffffff"
             text: qsTr(root.textLabel)
-            font.pointSize: 11
+            font.pointSize: 14
             anchors.centerIn: parent
             FontLoader {
                 id: bebasFont1
@@ -63,7 +63,7 @@ Item{
                 target: labelTitle1
                 property: "font.pointSize"
                 duration: 50
-                to: 13
+                to: 14
             }
             font.family: bebasFont1.name
             states: [
