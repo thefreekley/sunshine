@@ -392,7 +392,7 @@ Window {
                 Rectangle {
                     id: rectangle5
                     y: 8
-                    height: 200
+                    height: 268
                     width:400
                     color: "#00000000"
                     anchors.left: parent.left
@@ -403,8 +403,8 @@ Window {
                         anchors.horizontalCenter: parent.horizontalCenter
                         id: controlLight
                         x: 90
-                        anchors.top: controlMusic.bottom
-                        anchors.topMargin: 19
+                        anchors.top: parent.top
+                        anchors.topMargin: -19
                         anchors.horizontalCenterOffset: 0
                         implicitWidth: 300
                         implicitHeight: 26
@@ -438,9 +438,9 @@ Window {
                     T.Slider {
                         anchors.horizontalCenter: parent.horizontalCenter
                         id: controlMusic
-                        anchors.top: parent.top
-                        anchors.horizontalCenterOffset: 0
-                        anchors.topMargin: -19
+                        anchors.top: controlLight.bottom
+                        anchors.horizontalCenterOffset: 2
+                        anchors.topMargin: 18
 
                         implicitWidth: 300
                         implicitHeight: 26
@@ -471,12 +471,21 @@ Window {
                         }
                     }
 
+                    RectangleLabel{
+                        x: 50
+                        anchors.top: parent.top
+                        anchors.topMargin: 62
+                        textLabel: "RAINBOW"
+                        widthNew: 300
+                    }
+
                     Row {
                         id: row
                         x: 37
-                        y: 103
                         width: 326
-                        height: 60
+                        height: 32
+                        anchors.top: parent.top
+                        anchors.topMargin: 128
                         SmallButtonLight {
                             imageSource: "../images/light/1.png"
                         }
@@ -489,6 +498,92 @@ Window {
                         SmallButtonLight {
                             imageSource: "../images/light/4.png"
                         }
+                    }
+
+                    Row {
+                        id: row2
+                        x: 57
+                        width: 142
+                        anchors.top: parent.top
+                        anchors.topMargin: 170
+
+                        SmallButtonMusic {
+                            imageSource: "../images/music/1.png"
+                            troggle: "on"
+                        }
+                        SmallButtonMusic {
+                            imageSource: "../images/music/2.png"
+                        }
+                        SmallButtonMusic {
+                            imageSource: "../images/music/3.png"
+                        }
+                        SmallButtonMusic {
+                            imageSource: "../images/music/4.png"
+                        }
+                    }
+
+                    Row {
+                        id: row3
+                        x: 221
+                        width: 142
+                        height: 81
+                        anchors.top: parent.top
+                        anchors.topMargin: 170
+                        SmallButtonMusic {
+                            imageSource: "../images/music/5.png"
+                        }
+
+                        SmallButtonMusic {
+                            imageSource: "../images/music/6.png"
+                        }
+
+                        SmallButtonMusic {
+                            imageSource: "../images/music/7.png"
+                        }
+
+                        SmallButtonMusic {
+                            imageSource: "../images/music/8.png"
+                        }
+                    }
+
+                    Image {
+                        id: image
+                        anchors.left: row2.right
+                        anchors.right: row3.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        source: "../images/icon/music.png"
+                        anchors.bottomMargin: 35
+                        anchors.topMargin: 193
+                        anchors.rightMargin: 0
+                        anchors.leftMargin: 0
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    Image {
+                        id: imageLight
+                        x: 8
+                        width: 38
+                        height: 24
+                        anchors.right: controlLight.left
+                        anchors.top: controlLight.bottom
+                        source: "../images/icon/light.png"
+                        anchors.topMargin: -24
+                        anchors.rightMargin: 4
+                        fillMode: Image.PreserveAspectFit
+                    }
+
+                    Image {
+                        id: imageVoid
+                        x: 8
+                        width: 38
+                        height: 24
+                        anchors.right: controlMusic.left
+                        anchors.top: controlMusic.bottom
+                        source: "../images/icon/loud.png"
+                        anchors.rightMargin: 4
+                        fillMode: Image.PreserveAspectFit
+                        anchors.topMargin: -25
                     }
                 }
             }
@@ -621,7 +716,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:1.25}D{i:32}D{i:39}D{i:40}D{i:41}D{i:21}D{i:46}D{i:50}D{i:45}
-D{i:44}
+    D{i:0;formeditorZoom:0.9}D{i:54}D{i:55}D{i:60}D{i:65}D{i:70}D{i:71}
 }
 ##^##*/

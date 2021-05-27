@@ -6,14 +6,17 @@ import QtQuick.Templates 2.0 as T
 
 Item{
     property string textLabel: "value"
-    width: 210
-    height: 55
+    property int widthNew : 210
+    property int heigtNew : 55
+
+    width: widthNew
+    height: heigtNew
 
     id: root
     Rectangle {
 
         id:rectangle_lable
-        width: 210
+        width: root.widthNew
         height: 42
         color: "#9a4268"
         radius: 20
