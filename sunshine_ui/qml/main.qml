@@ -3,13 +3,19 @@ import QtQuick.Window 2.15
 import QtGraphicalEffects 1.15
 import QtQuick.Controls 2.15
 import QtQuick.Templates 2.0 as T
+import QtQuick.Dialogs 1.0
 
 Window {
+    id: aplicationWindow
     width: 1160
     height: 650
     visible: true
     color: "#00000000"
     title: qsTr("Hello World")
+    flags: Qt.FramelessWindowHint
+    property int previousX
+    property int previousY
+
     FontLoader {
         id: bebasRegularFont
         source: "../font/BebasNeue Regular.ttf"
@@ -23,6 +29,7 @@ Window {
         anchors.topMargin: 19
         anchors.rightMargin: 5
         anchors.leftMargin: 5
+
 
         RadialGradient {
             id: radialGradient
@@ -110,7 +117,7 @@ Window {
                     width: 50
                     height: 50
                     color: "on"
-                    imageSource: "../images/icon/music.png"
+                    imageSource: "../images/icon/sleep.png"
                     x_value: 100
                     y_value: 110
 
@@ -141,8 +148,8 @@ Window {
                     id: column
                     x: 8
                     y: 17
-                    width: 200
-                    height: 336
+                    width: 214
+                    height: 579
 
                     RectangleLabel {
                         textLabel: "ON"
@@ -158,6 +165,225 @@ Window {
 
                     RectangleLabel {
                         textLabel: "Stereo mixer"
+                    }
+
+                    Rectangle{
+
+                        id: rectangle10
+                        height: 350
+                        width: parent.width
+                        color: "#00000000"
+                        Rectangle {
+                            property int timeGradient: 5000
+                            anchors.centerIn: parent
+                            id: colorGradient
+                            width: 30
+                            height: 300
+                            color: "#ffffff"
+                            radius: 15
+                            gradient: Gradient {
+
+                                GradientStop { position: 0.0; color: colorDialog1.color
+                                    SequentialAnimation on color
+                                    {
+                                        id: gradientPaintTop;
+                                        loops: Animation.Infinite
+
+
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog2.color
+                                            to: colorDialog1.color
+                                            duration: colorGradient.timeGradient
+                                        }
+
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog1.color
+                                            to: colorDialog2.color
+                                            duration: colorGradient.timeGradient
+                                        }
+
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog2.color
+                                            to: colorDialog2.color
+                                            duration: colorGradient.timeGradient
+                                        }
+
+
+
+                                    }
+                                }
+
+                                GradientStop { position: 0.5; color: colorDialog1.color
+                                    SequentialAnimation on color
+                                    {
+                                        id: gradientPaintMiddle;
+                                        loops: Animation.Infinite
+
+
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog2.color
+                                            to: colorDialog2.color
+                                            duration: colorGradient.timeGradient
+                                        }
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog2.color
+                                            to: colorDialog1.color
+                                            duration: colorGradient.timeGradient
+                                        }
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog1.color
+                                            to: colorDialog2.color
+                                            duration: colorGradient.timeGradient
+                                        }
+
+
+
+                                    }
+                                }
+                                GradientStop { position: 1.0; color: colorDialog2.color
+                                    SequentialAnimation on color
+                                    {
+                                        id: gradientPaintBottom;
+                                        loops: Animation.Infinite
+
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog1.color
+                                            to: colorDialog2.color
+                                            duration: colorGradient.timeGradient
+                                        }
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog2.color
+                                            to: colorDialog2.color
+                                            duration: colorGradient.timeGradient
+                                        }
+                                        ColorAnimation
+                                        {
+                                            from: colorDialog2.color
+                                            to: colorDialog1.color
+                                            duration: colorGradient.timeGradient
+                                        }
+
+
+
+
+
+
+                                    }}
+
+                            }
+
+
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
+
+                        Rectangle {
+                            id: colorButton1
+                            x: 56
+                            width: 24
+                            height: 24
+                            radius: 12
+                            color: colorDialog1.color
+                            anchors.right: colorGradient.left
+                            anchors.top: colorGradient.bottom
+                            anchors.topMargin: -293
+                            anchors.rightMargin: 6
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: colorDialog1.open()
+                                hoverEnabled: true
+
+                                onEntered: { colorDialogWidth1Up.start(); colorDialogHeight1Up.start();}
+                                onExited: { colorDialogWidth1Down.start(); colorDialogHeight1Down.start();}
+
+                            }
+
+                            NumberAnimation {id: colorDialogWidth1Up; property: "width"; target: colorButton1;duration: 50;to: 26}
+                            NumberAnimation {id: colorDialogWidth1Down; property: "width"; target: colorButton1;duration: 50;to: 24}
+                            NumberAnimation {id: colorDialogHeight1Up; property: "height"; target: colorButton1;duration: 50;to: 26}
+                            NumberAnimation {id: colorDialogHeight1Down; property: "height"; target: colorButton1;duration: 50;to: 24}
+
+
+
+
+
+                        }
+
+                        Rectangle {
+                            id: colorButton2
+                            x: 56
+                            width: 24
+                            height: 24
+                            radius: 12
+                            color: colorDialog2.color
+                            anchors.right: colorGradient.left
+                            anchors.top: colorGradient.bottom
+                            anchors.topMargin: -35
+                            anchors.rightMargin: 6
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: colorDialog2.open()
+                                hoverEnabled: true
+                                onEntered: { colorDialogWidth2Up.start(); colorDialogHeight2Up.start();}
+                                onExited: { colorDialogWidth2Down.start(); colorDialogHeight2Down.start();}
+                            }
+
+
+                            NumberAnimation {id: colorDialogWidth2Up; property: "width"; target: colorButton2;duration: 50;to: 26}
+                            NumberAnimation {id: colorDialogWidth2Down; property: "width"; target: colorButton2;duration: 50;to: 24}
+                            NumberAnimation {id: colorDialogHeight2Up; property: "height"; target: colorButton2;duration: 50;to: 26}
+                            NumberAnimation {id: colorDialogHeight2Down; property: "height"; target: colorButton2;duration: 50;to: 24}
+
+                        }
+
+
+
+                        Image {
+                            id: painImage
+                            width: 37
+                            height: 33
+                            anchors.left: colorGradient.right
+                            anchors.top: colorGradient.bottom
+                            source: "../images/icon/paint.png"
+                            anchors.topMargin: -293
+                            anchors.leftMargin: 6
+                            fillMode: Image.PreserveAspectFit
+                        }
+
+                        ColorDialog {
+                            id: colorDialog1
+                            title: qsTr("choose the color")
+                            onAccepted: {
+                                gradientPaintTop.restart()
+                                gradientPaintBottom.restart()
+                                gradientPaintMiddle.restart()
+                            }
+
+                            color: "#ff0100"
+                        }
+
+                        ColorDialog {
+                            id: colorDialog2
+                            title: qsTr("choose the color")
+                            onAccepted: {
+                                gradientPaintTop.restart()
+                               gradientPaintBottom.restart()
+                                gradientPaintMiddle.restart()
+                            }
+                            color: "#c60100"
+                        }
+
+
+
+
                     }
                 }
 
@@ -267,7 +493,7 @@ Window {
                                 horizontalAlignment: "AlignRight"
                                 width:60
                                 font.family: bebasFont1.name
-                                 font.pointSize: 13
+                                font.pointSize: 13
                                 placeholderText: qsTr("from")
                                 color: "black"
                                 background: Rectangle { color: "#ffd400" }
@@ -277,7 +503,7 @@ Window {
 
                                 width:60
                                 font.family: bebasFont1.name
-                                 font.pointSize: 13
+                                font.pointSize: 13
                                 placeholderText: qsTr("to")
                                 color: "black"
                                 background: Rectangle { color: "#ffd400" }
@@ -285,7 +511,7 @@ Window {
                         }
 
                         Label {
-                             anchors.centerIn: parent
+                            anchors.centerIn: parent
                             id: label2
                             font.pointSize: 13
                             width: 10
@@ -356,19 +582,19 @@ Window {
                         anchors.leftMargin: -117
                         color: "#9b4068"
 
-                            TextField {
-                                horizontalAlignment: "AlignHCenter"
-                                 anchors.centerIn: parent
-                                width:60
-                                font.family: bebasFont1.name
-                                 font.pointSize: 13
-                                placeholderText: qsTr("...")
-                                color: "white"
-                                background: Rectangle { color: "#9b4068" }
-                            }
-
-
+                        TextField {
+                            horizontalAlignment: "AlignHCenter"
+                            anchors.centerIn: parent
+                            width:60
+                            font.family: bebasFont1.name
+                            font.pointSize: 13
+                            placeholderText: qsTr("...")
+                            color: "white"
+                            background: Rectangle { color: "#9b4068" }
                         }
+
+
+                    }
 
 
 
@@ -602,8 +828,9 @@ Window {
 
 
     Rectangle {
-        id: rectangle1
-        height: 42
+
+        id: headerBar
+        height: 25
 
         color:  "#9a4268"
         anchors.left: parent.left
@@ -612,7 +839,10 @@ Window {
         anchors.rightMargin: 5
         anchors.leftMargin: 5
         anchors.topMargin: 2
-        radius: 20
+        radius: 3
+
+
+
 
         Label {
             FontLoader {
@@ -632,8 +862,10 @@ Window {
 
 
             MouseArea {
+                x: 0
                 hoverEnabled: true
                 anchors.fill: parent
+                anchors.bottomMargin: -10
                 onEntered: {
                     labelTitle.state = "PRESSED"
                     labelUp.start()
@@ -704,6 +936,123 @@ Window {
 
         }
 
+        Row {
+            id: row4
+
+            width: 75
+            height: 25
+            anchors.right: parent.right
+            anchors.rightMargin: 15
+            anchors.verticalCenter: parent.verticalCenter
+            Image {
+                id: minimize
+                width: 25
+                height: 25
+                source: "../images/icon/minimaze.png"
+                fillMode: Image.PreserveAspectFit
+
+                MouseArea {
+                    hoverEnabled: true
+                    anchors.fill: parent
+                    onEntered: minimize.opacity=0.7
+                    onExited: minimize.opacity=1
+                    onClicked: aplicationWindow.visibility = "Minimized"
+                }
+            }
+
+            Image {
+                id: maximize
+                width: 25
+                height: 25
+                source: "../images/icon/maximize.png"
+                fillMode: Image.PreserveAspectFit
+
+                MouseArea {
+                    hoverEnabled: true
+                    anchors.fill: parent
+                    onEntered: maximize.opacity=0.7
+                    onExited: maximize.opacity=1
+                    onClicked: aplicationWindow.visibility = "Maximized"
+                }
+            }
+
+            Image {
+                id: close
+                width: 25
+                height: 25
+                source: "../images/icon/close.png"
+                fillMode: Image.PreserveAspectFit
+
+                MouseArea {
+                    hoverEnabled: true
+                    anchors.fill: parent
+                    onEntered: close.opacity=0.7
+                    onExited: close.opacity=1
+                    onClicked: Qt.quit()
+                }
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            anchors.rightMargin: 96
+
+                   onPressed: {
+                       previousX = mouseX
+                       previousY = mouseY
+                   }
+
+                   onMouseXChanged: {
+                       var dx = mouseX - previousX
+                       aplicationWindow.setX(aplicationWindow.x + dx)
+                   }
+
+                   onMouseYChanged: {
+                       var dy = mouseY - previousY
+                       aplicationWindow.setY(aplicationWindow.y + dy)
+                   }
+
+               }
+
+           }
+
+           MouseArea {
+               width: 5
+
+               anchors {
+                   right: parent.right
+                   top: parent.top
+                   bottom: parent.bottom
+               }
+
+               cursorShape: Qt.SizeHorCursor
+
+               onPressed: previousX = mouseX
+
+               onMouseXChanged: {
+                   var dx = mouseX - previousX
+                   aplicationWindow.setWidth(parent.width + dx)
+               }
+
+           }
+
+           MouseArea {
+               height: 5
+               anchors {
+                   top: parent.top
+                   left: parent.left
+                   right: parent.right
+               }
+
+               cursorShape: Qt.SizeVerCursor
+
+               onPressed: previousY = mouseY
+
+               onMouseYChanged: {
+                   var dy = mouseY - previousY
+                   aplicationWindow.setY(aplicationWindow.y + dy)
+                   aplicationWindow.setHeight(aplicationWindow.height - dy)
+
+               }
     }
 }
 
@@ -714,8 +1063,4 @@ Window {
 
 
 
-/*##^##
-Designer {
-    D{i:0;formeditorZoom:0.9}D{i:54}D{i:55}D{i:60}D{i:65}D{i:70}D{i:71}
-}
-##^##*/
+
