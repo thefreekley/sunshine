@@ -5,7 +5,7 @@ import QtQuick.Controls 2.15
 
 Item {
    id: root
-   property string troggle: "off"
+   property bool troggle: false
    property string imageSource: "value"
    property int x_value: 0
    property int y_value: 0
@@ -20,7 +20,7 @@ Item {
         x:root.x_value
         width: 50
         height: 50
-        color: (root.troggle=="off") ? "#00000000" : "white"
+        color: (root.troggle==false) ? "#00000000" : "white"
         border.color: "#ffffff"
         border.width: 3
         radius: 25
@@ -36,7 +36,7 @@ Item {
             id: colorOverlayRoundImage
             anchors.fill: imageRoundButton
             source: imageRoundButton
-            color: (root.troggle=="on") ? "#9a4268" : "white"
+            color: (root.troggle==true) ? "#9a4268" : "white"
         }
 
 
@@ -45,35 +45,35 @@ Item {
             anchors.fill: parent
             onClicked: {
 
-                if (root.troggle == "on") root.troggle= "off"
-                else root.troggle= "on"
+                if (root.troggle == true) root.troggle= false
+                else root.troggle= true
 
                 if(imageSource == "../images/icon/music.png"){
-                    wandLight.troggle = "off"
-                    iconMusic.troggle = "on"
+                    wandLight.troggle = false
+                    iconMusic.troggle = true
 
-                     smallButtonMusic1.troggle = "on"
-                     painLight.troggle = "on"
-                    lightButton1.troggle = "off"
-                    lightButton2.troggle = "off"
-                    lightButton3.troggle = "off"
-                    lightButton4.troggle = "off"
+                     smallButtonMusic1.troggle = true
+                     painLight.troggle = true
+                    lightButton1.troggle = false
+                    lightButton2.troggle = false
+                    lightButton3.troggle = false
+                    lightButton4.troggle = false
 
                 }
                 if(imageSource == "../images/icon/magic-wand.png"){
-                    iconMusic.troggle = "off"
-                    wandLight.troggle = "on"
-                     lightButton1.troggle = "on"
-                      painLight.troggle = "off"
+                    iconMusic.troggle = false
+                    wandLight.troggle = true
+                     lightButton1.troggle = true
+                      painLight.troggle = false
 
-                    smallButtonMusic1.troggle = "off"
-                    smallButtonMusic2.troggle = "off"
-                    smallButtonMusic3.troggle = "off"
-                    smallButtonMusic4.troggle = "off"
-                    smallButtonMusic5.troggle = "off"
-                    smallButtonMusic6.troggle = "off"
-                    smallButtonMusic7.troggle = "off"
-                    smallButtonMusic8.troggle = "off"
+                    smallButtonMusic1.troggle = false
+                    smallButtonMusic2.troggle = false
+                    smallButtonMusic3.troggle = false
+                    smallButtonMusic4.troggle = false
+                    smallButtonMusic5.troggle = false
+                    smallButtonMusic6.troggle = false
+                    smallButtonMusic7.troggle = false
+                    smallButtonMusic8.troggle = false
 
 //                    console.log(wandLight.troggle)
 //                    console.log(iconOff.troggle)
@@ -82,11 +82,13 @@ Item {
 //                    console.log(painLight.troggle)
                 }
                 if(imageSource == "../images/icon/paint.png"){
-                    lightButton1.troggle = "off"
-                    lightButton2.troggle = "off"
-                    lightButton3.troggle = "off"
-                    lightButton4.troggle = "off"
+                    lightButton1.troggle = false
+                    lightButton2.troggle = false
+                    lightButton3.troggle = false
+                    lightButton4.troggle = false
                 }
+
+                aplicationWindow.callModeBackend()
             }
 
 
@@ -95,15 +97,15 @@ Item {
 
             onEntered: {
                  roundButtonImage.onHovered = true
-                colorOverlayRoundImage.color = (root.troggle=="off") ? "#9a4268" : "white"
-                roundButtonImage.color = (root.troggle=="on") ? "#00000000" : "white"
+                colorOverlayRoundImage.color = (root.troggle==false) ? "#9a4268" : "white"
+                roundButtonImage.color = (root.troggle==true) ? "#00000000" : "white"
 
 
             }
             onExited: {
                  roundButtonImage.onHovered = false
-                colorOverlayRoundImage.color = (root.troggle=="on") ? "#9a4268" : "white"
-                roundButtonImage.color = (root.troggle=="off") ? "#00000000" : "white"
+                colorOverlayRoundImage.color = (root.troggle==true) ? "#9a4268" : "white"
+                roundButtonImage.color = (root.troggle==false) ? "#00000000" : "white"
 
 
             }
@@ -114,8 +116,8 @@ Item {
                 running: true
                 onTriggered: {
                         if (!roundButtonImage.onHovered){
-                            colorOverlayRoundImage.color = (root.troggle=="on") ? "#9a4268" : "white"
-                            roundButtonImage.color = (root.troggle=="off") ? "#00000000" : "white"
+                            colorOverlayRoundImage.color = (root.troggle==true) ? "#9a4268" : "white"
+                            roundButtonImage.color = (root.troggle==false) ? "#00000000" : "white"
                     }
                 }
         }

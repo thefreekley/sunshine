@@ -6,7 +6,7 @@ import QtQuick.Templates 2.0 as T
 
 Item {
     id: root
-    property string troggle: "off"
+    property bool troggle: false
     property string imageSource: "value"
     property int x_value: 0
     property int y_value: 0
@@ -20,7 +20,7 @@ Item {
         x:root.x_value
         width: 50
         height: 50
-        color: (root.troggle=="off") ? "#c60100" : "white"
+        color: (root.troggle==false) ? "#c60100" : "white"
 
         radius: 25
         Image {
@@ -35,7 +35,7 @@ Item {
             id: colorOverlayRoundImage
             anchors.fill: imageRoundButton
             source: imageRoundButton
-            color: (root.troggle=="on") ? "#9a4268" : "white"
+            color: (root.troggle==true) ? "#9a4268" : "white"
         }
 
 
@@ -44,21 +44,21 @@ Item {
             anchors.fill: parent
             onClicked: {
                 root.clicked()
-                root.troggle = (root.troggle == "on") ? "off" : "on"
+                root.troggle = (root.troggle == true) ? false : true
             }
 
 
 
             onEntered: {
 
-                colorOverlayRoundImage.color = (troggle=="off") ? "#c60100" : "white"
-                roundButtonImage.color = (troggle=="on") ? "#c60100" : "white"
+                colorOverlayRoundImage.color = (troggle==false) ? "#c60100" : "white"
+                roundButtonImage.color = (troggle==true) ? "#c60100" : "white"
 
 
             }
             onExited: {
-                colorOverlayRoundImage.color = (troggle=="on") ? "#c60100" : "white"
-                roundButtonImage.color = (troggle=="off") ? "#c60100" : "white"
+                colorOverlayRoundImage.color = (troggle==true) ? "#c60100" : "white"
+                roundButtonImage.color = (troggle==false) ? "#c60100" : "white"
 
 
             }

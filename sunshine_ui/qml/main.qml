@@ -16,6 +16,16 @@ Window {
     property int previousX
     property int previousY
 
+
+    function callModeBackend(){
+        backend.getModeTroggle(wandLight.troggle,iconMusic.troggle,iconOff.troggle,sleepLight.troggle,painLight.troggle)
+
+        backend.getLightTroggle(lightButton1.troggle,lightButton2.troggle,lightButton3.troggle,lightButton4.troggle)
+
+        backend.getMusicTroggle(smallButtonMusic1.troggle,smallButtonMusic2.troggle,smallButtonMusic3.troggle,smallButtonMusic4.troggle,
+                                smallButtonMusic5.troggle,smallButtonMusic6.troggle,smallButtonMusic7.troggle,smallButtonMusic8.troggle)
+    }
+
     FontLoader {
         id: bebasRegularFont
         source: "../font/BebasNeue Regular.ttf"
@@ -94,7 +104,7 @@ Window {
                     id: iconOff
                     width: 50
                     height: 50
-                    troggle: "on"
+                    troggle: true
                     imageSource: "../images/icon/off.png"
                     x_value: 0
                     y_value: 140
@@ -105,7 +115,7 @@ Window {
                     id: iconMusic
                     width: 50
                     height: 50
-                    troggle: "off"
+                    troggle: false
                     imageSource: "../images/icon/music.png"
                     x_value: -100
                     y_value: 110
@@ -117,7 +127,7 @@ Window {
                     id: sleepLight
                     width: 50
                     height: 50
-                    troggle: "off"
+                    troggle: false
                     imageSource: "../images/icon/sleep.png"
                     x_value: 100
                     y_value: 110
@@ -127,7 +137,7 @@ Window {
                     id: painLight
                     width: 50
                     height: 50
-                    troggle: "off"
+                    troggle: false
                     imageSource: "../images/icon/paint.png"
                     x_value: 150
                     y_value: 20
@@ -138,7 +148,7 @@ Window {
                     id: wandLight
                     width: 50
                     height: 50
-                    troggle: "on"
+                    troggle: true
                     imageSource: "../images/icon/magic-wand.png"
                     x_value: -150
                     y_value: 20
@@ -153,7 +163,7 @@ Window {
                     height: 579
 
                     RectangleLabel {
-                        textLabel: "ON"
+                        textLabel: "on"
                     }
 
                     RectangleLabel {
@@ -529,7 +539,7 @@ Window {
                         id: treeButton
                         width: 50
                         height: 50
-                        troggle: "off"
+                        troggle: false
                         anchors.left: parent.left
                         anchors.top: parent.top
                         anchors.leftMargin: 0
@@ -716,22 +726,22 @@ Window {
                         SmallButtonLight {
                             id: lightButton1
                             imageSource: "../images/light/1.png"
-                            troggle: "on"
+                            troggle: true
                         }
                         SmallButtonLight {
                             id: lightButton2
                             imageSource: "../images/light/2.png"
-                            troggle: "off"
+                            troggle: false
                         }
                         SmallButtonLight {
                             id: lightButton3
                             imageSource: "../images/light/3.png"
-                            troggle: "off"
+                            troggle: false
                         }
                         SmallButtonLight {
                             id: lightButton4
                             imageSource: "../images/light/4.png"
-                            troggle: "off"
+                            troggle: false
                         }
                     }
 
@@ -745,22 +755,22 @@ Window {
                         SmallButtonMusic {
                             id: smallButtonMusic1
                             imageSource: "../images/music/1.png"
-                            troggle: "off"
+                            troggle: false
                         }
                         SmallButtonMusic {
                             id: smallButtonMusic2
                             imageSource: "../images/music/2.png"
-                            troggle: "off"
+                            troggle: false
                         }
                         SmallButtonMusic {
                             id: smallButtonMusic3
                             imageSource: "../images/music/3.png"
-                            troggle: "off"
+                            troggle: false
                         }
                         SmallButtonMusic {
                             id: smallButtonMusic4
                             imageSource: "../images/music/4.png"
-                            troggle: "off"
+                            troggle: false
                         }
                     }
 
@@ -774,25 +784,25 @@ Window {
                         SmallButtonMusic {
                             id: smallButtonMusic5
                             imageSource: "../images/music/5.png"
-                            troggle: "off"
+                            troggle: false
                         }
 
                         SmallButtonMusic {
                             id: smallButtonMusic6
                             imageSource: "../images/music/6.png"
-                            troggle: "off"
+                            troggle: false
                         }
 
                         SmallButtonMusic {
                             id: smallButtonMusic7
                             imageSource: "../images/music/7.png"
-                            troggle: "off"
+                            troggle: false
                         }
 
                         SmallButtonMusic {
                             id: smallButtonMusic8
                             imageSource: "../images/music/8.png"
-                            troggle: "off"
+                            troggle: false
                         }
                     }
 
@@ -1114,6 +1124,10 @@ Window {
             aplicationWindow.setHeight(aplicationWindow.height - dy)
 
         }
+    }
+
+    Connections{
+        target:backend
     }
 
 }

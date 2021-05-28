@@ -6,7 +6,7 @@ import QtQuick.Templates 2.0 as T
 
 Item{
      property string imageSource: "value"
-    property string troggle: "off"
+    property bool troggle: false
     id: root
 
     width: 80
@@ -25,7 +25,7 @@ Item{
             width:5
             height: 5
             radius: 2.5
-            color: (root.troggle=="on") ? "#ff6860" : "#00000000"
+            color: (root.troggle==true) ? "#ff6860" : "#00000000"
              anchors.verticalCenter: parent.verticalCenter
              anchors.leftMargin: -20
         }
@@ -48,14 +48,14 @@ Item{
             onExited: {
                 smallButtonDown.start()
                 smallButtonLight.onHovered = false
-                smallRound.color = (troggle=="on") ? "#ffd400" : "#00000000"
+                smallRound.color = (troggle==true) ? "#ffd400" : "#00000000"
             }
             onClicked: {
-                lightButton1.troggle = "off"
-                lightButton2.troggle = "off"
-                lightButton3.troggle = "off"
-                lightButton4.troggle = "off"
-                if (wandLight.troggle == "on")  root.troggle = "on"
+                lightButton1.troggle = false
+                lightButton2.troggle = false
+                lightButton3.troggle = false
+                lightButton4.troggle = false
+                if (wandLight.troggle == true)  root.troggle = true
             }
 
         }
@@ -67,7 +67,7 @@ Item{
                 onTriggered: {
 
                         if (!smallButtonLight.onHovered){
-                        smallRound.color = (troggle=="on") ? "#ffd400" : "#00000000"
+                        smallRound.color = (troggle==true) ? "#ffd400" : "#00000000"
                     }
                 }
         }

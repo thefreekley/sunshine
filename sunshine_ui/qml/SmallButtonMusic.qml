@@ -6,7 +6,7 @@ import QtQuick.Templates 2.0 as T
 
 Item{
     property string imageSource: "value"
-    property string troggle: "off"
+    property bool troggle: false
 
 
 
@@ -32,7 +32,7 @@ Item{
             width:5
             height: 5
             radius: 2.5
-            color: (troggle=="on") ? "#ffd400" : "#00000000"
+            color: (troggle==true) ? "#ffd400" : "#00000000"
 
 
             anchors.verticalCenter: parent.verticalCenter
@@ -46,7 +46,7 @@ Item{
                 running: true
                 onTriggered: {
                         if (!rectangleSmallButonMusic.onHovered){
-                        smallRound.color = (troggle=="on") ? "#ffd400" : "#00000000"
+                        smallRound.color = (troggle==true) ? "#ffd400" : "#00000000"
                     }
                 }
 }
@@ -73,31 +73,31 @@ Item{
             onExited: {
                 smallButtonMusicDown.start()
                 rectangleSmallButonMusic.onHovered = false
-                smallRound.color = (troggle=="on") ? "#ffd400" : "#00000000"
+                smallRound.color = (troggle==true) ? "#ffd400" : "#00000000"
 
             }
             onClicked: {
-                if(iconMusic.troggle == "on"){
-                smallButtonMusic1.troggle = "off"
-                smallButtonMusic2.troggle = "off"
-                smallButtonMusic3.troggle = "off"
-                smallButtonMusic4.troggle = "off"
-                smallButtonMusic5.troggle = "off"
-                smallButtonMusic6.troggle = "off"
-                smallButtonMusic7.troggle = "off"
-                smallButtonMusic8.troggle = "off"
+                if(iconMusic.troggle == true){
+                smallButtonMusic1.troggle = false
+                smallButtonMusic2.troggle = false
+                smallButtonMusic3.troggle = false
+                smallButtonMusic4.troggle = false
+                smallButtonMusic5.troggle = false
+                smallButtonMusic6.troggle = false
+                smallButtonMusic7.troggle = false
+                smallButtonMusic8.troggle = false
                 if(root.imageSource == "../images/music/1.png" ||
                         root.imageSource == "../images/music/2.png" ||
                         root.imageSource == "../images/music/3.png" ||
                         root.imageSource == "../images/music/4.png"
                         ){
-                    painLight.troggle = "on"
+                    painLight.troggle = true
                 }
                 else{
-                    painLight.troggle = "off"
+                    painLight.troggle = false
                 }
 
-                root.troggle = "on"
+                root.troggle = true
             }
 
         }
