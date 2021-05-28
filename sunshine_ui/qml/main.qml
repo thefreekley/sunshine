@@ -87,7 +87,7 @@ Window {
                     }
 
                     Label {
-                        id: label1
+                        id: labelNameMone
                         x: 53
                         y: 126
                         width: 94
@@ -376,9 +376,10 @@ Window {
                                 gradientPaintTop.restart()
                                 gradientPaintBottom.restart()
                                 gradientPaintMiddle.restart()
+                                backend.getCollorPallet(colorDialog1.color,1)
                             }
 
-                            color: "#ff0100"
+                            color: backend.colorOnePallete()
                         }
 
                         ColorDialog {
@@ -388,8 +389,9 @@ Window {
                                 gradientPaintTop.restart()
                                 gradientPaintBottom.restart()
                                 gradientPaintMiddle.restart()
+                                backend.getCollorPallet(colorDialog1.color,2)
                             }
-                            color: "#c60100"
+                            color: backend.colorTwoPallete()
                         }
 
 
@@ -466,13 +468,23 @@ Window {
                     }
 
                     Rectangle {
-                        id: rectangle7
+                        id: sleepButton
+                         property string timeToSleepValue: "-"
                         x: 0
                         y: 46
                         width: 113
                         height: 30
                         radius: 15
                         color: "#00d4e0"
+
+                        MouseArea{
+                            anchors.fill: parent
+                            onClicked:{
+                                sleepButton.timeToSleepValue = qsTr(textFieldFrom.text + "-" + textFieldTo.text)
+
+                                backend.getTimeFromToSleep(sleepButton.timeToSleepValue)
+                            }
+                        }
 
                         Label {
                             id: sleepAll
@@ -481,6 +493,7 @@ Window {
                             color: "white"
                             text: qsTr("SLEEP")
                             anchors.centerIn: parent
+
                         }
                     }
 
@@ -501,22 +514,33 @@ Window {
                             height: 30
 
                             TextField {
+                                id: textFieldFrom
                                 horizontalAlignment: "AlignRight"
                                 width:60
                                 font.family: bebasFont1.name
                                 font.pointSize: 13
                                 placeholderText: qsTr("from")
                                 color: "black"
+
+                                inputMask: "99:99"
+                                inputMethodHints: Qt.ImhDigitsOnly
+                                validator: RegExpValidator { regExp: /^([0-1\s]?[0-9\s]|2[0-3\s]):([0-5\s][0-9\s])$ / }
+
                                 background: Rectangle { color: "#ffd400" }
                             }
 
                             TextField {
-
+                                id: textFieldTo
                                 width:60
                                 font.family: bebasFont1.name
                                 font.pointSize: 13
                                 placeholderText: qsTr("to")
                                 color: "black"
+
+                                inputMask: "99:99"
+                                inputMethodHints: Qt.ImhDigitsOnly
+                                validator: RegExpValidator { regExp: /^([0-1\s]?[0-9\s]|2[0-3\s]):([0-5\s][0-9\s])$ / }
+
                                 background: Rectangle { color: "#ffd400" }
                             }
                         }
@@ -645,6 +669,13 @@ Window {
                         anchors.horizontalCenterOffset: 0
                         implicitWidth: 300
                         implicitHeight: 26
+                        from:0
+                        to:100
+
+                        value: backend.lightSliderValue()
+
+                        onValueChanged: backend.getSliderLightValue(controlLight.value)
+
 
                         handle: Rectangle {
                             x: controlLight.visualPosition * (controlLight.width - width)
@@ -655,6 +686,9 @@ Window {
                             radius: 7
                             color: controlLight.pressed ? "#f0f0f0" : "#f6f6f6"
                             border.color: UIStyle.colorQtGray7
+
+
+
                         }
 
                         background: Rectangle {
@@ -681,6 +715,13 @@ Window {
 
                         implicitWidth: 300
                         implicitHeight: 26
+
+                        from:0
+                        to:100
+
+                        value: backend.loudSliderValue()
+
+                        onValueChanged: backend.getSliderLoundValue(controlMusic.value)
 
                         handle: Rectangle {
                             x: controlMusic.visualPosition * (controlMusic.width - width)
@@ -726,22 +767,22 @@ Window {
                         SmallButtonLight {
                             id: lightButton1
                             imageSource: "../images/light/1.png"
-                            troggle: true
+                            troggle: (backend.lightModeNumber() == 1) ? true : false
                         }
                         SmallButtonLight {
                             id: lightButton2
                             imageSource: "../images/light/2.png"
-                            troggle: false
+                            troggle: (backend.lightModeNumber() == 2) ? true : false
                         }
                         SmallButtonLight {
                             id: lightButton3
                             imageSource: "../images/light/3.png"
-                            troggle: false
+                            troggle: (backend.lightModeNumber() == 3) ? true : false
                         }
                         SmallButtonLight {
                             id: lightButton4
                             imageSource: "../images/light/4.png"
-                            troggle: false
+                            troggle: (backend.lightModeNumber() == 4) ? true : false
                         }
                     }
 

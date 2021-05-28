@@ -55,7 +55,11 @@ Item{
                 lightButton2.troggle = false
                 lightButton3.troggle = false
                 lightButton4.troggle = false
-                if (wandLight.troggle == true)  root.troggle = true
+                if (wandLight.troggle == true) {
+                    root.troggle = true
+                    aplicationWindow.callModeBackend()
+                }
+
             }
 
         }

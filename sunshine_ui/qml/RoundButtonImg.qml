@@ -49,10 +49,21 @@ Item {
                 else root.troggle= true
 
                 if(imageSource == "../images/icon/music.png"){
+                    labelNameMone.text = qsTr("Mode:music visualisation")
                     wandLight.troggle = false
                     iconMusic.troggle = true
 
-                     smallButtonMusic1.troggle = true
+                     smallButtonMusic1.troggle = (backend.musicModeNumber() == 1) ? true : false
+                    smallButtonMusic2.troggle = (backend.musicModeNumber() == 2) ? true : false
+                    smallButtonMusic3.troggle = (backend.musicModeNumber() == 3) ? true : false
+                    smallButtonMusic4.troggle = (backend.musicModeNumber() == 4) ? true : false
+                    smallButtonMusic5.troggle = (backend.musicModeNumber() == 5) ? true : false
+                    smallButtonMusic6.troggle = (backend.musicModeNumber() == 6) ? true : false
+                    smallButtonMusic7.troggle = (backend.musicModeNumber() == 7) ? true : false
+                    smallButtonMusic8.troggle = (backend.musicModeNumber() == 8) ? true : false
+
+
+
                      painLight.troggle = true
                     lightButton1.troggle = false
                     lightButton2.troggle = false
@@ -61,9 +72,15 @@ Item {
 
                 }
                 if(imageSource == "../images/icon/magic-wand.png"){
+                    labelNameMone.text = qsTr("Mode:light")
                     iconMusic.troggle = false
                     wandLight.troggle = true
-                     lightButton1.troggle = true
+
+                    lightButton1.troggle =  (backend.lightModeNumber() == 1) ? true : false
+                    lightButton2.troggle =  (backend.lightModeNumber() == 2) ? true : false
+                    lightButton3.troggle =  (backend.lightModeNumber() == 3) ? true : false
+                    lightButton4.troggle =  (backend.lightModeNumber() == 4) ? true : false
+
                       painLight.troggle = false
 
                     smallButtonMusic1.troggle = false
@@ -82,10 +99,27 @@ Item {
 //                    console.log(painLight.troggle)
                 }
                 if(imageSource == "../images/icon/paint.png"){
+                     if (root.troggle && wandLight.troggle) labelNameMone.text = qsTr("Mode:paint")
+                     if (!root.troggle && wandLight.troggle) labelNameMone.text = qsTr("Mode:light")
+
+                     if(!wandLight){
+                     if (smallButtonMusic1.troggle == true ||
+                         smallButtonMusic2.troggle == true ||
+                         smallButtonMusic3.troggle == true ||
+                         smallButtonMusic4.troggle == true) root.troggle = true
+                     else root.troggle = false
+                    }
+
+
+
                     lightButton1.troggle = false
                     lightButton2.troggle = false
                     lightButton3.troggle = false
                     lightButton4.troggle = false
+                }
+                if(imageSource == "../images/icon/sleep.png"){
+                      console.log(backend.currentTime())
+                      if (root.troggle) textFieldFrom.text = backend.currentTime()
                 }
 
                 aplicationWindow.callModeBackend()

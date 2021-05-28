@@ -98,6 +98,8 @@ Item{
                 }
 
                 root.troggle = true
+
+             aplicationWindow.callModeBackend()
             }
 
         }
