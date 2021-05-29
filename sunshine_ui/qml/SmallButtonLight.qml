@@ -51,6 +51,7 @@ Item{
                 smallRound.color = (troggle==true) ? "#ffd400" : "#00000000"
             }
             onClicked: {
+                save.opacity = 0.6
                 lightButton1.troggle = false
                 lightButton2.troggle = false
                 lightButton3.troggle = false

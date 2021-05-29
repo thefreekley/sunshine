@@ -414,9 +414,22 @@ Window {
 
                     ProgressBar {
                         id: control
-                        value: 0.5
+
                         width: parent.width - 20
                         height: 12
+
+                        Timer {
+                            id: timerToSleep
+                            interval: 1000;
+                            running: true;
+                            repeat: true
+                            onTriggered: {
+
+                                timeToSleepRemainTime.text = backend.remainTime()
+                                control.value = backend.progressBarValue()
+
+                            }
+                        }
 
                         background: Rectangle {
                             implicitWidth: parent.width - 20
@@ -438,6 +451,9 @@ Window {
                         }
                     }
 
+
+
+
                     FontLoader {
                         id: bebasFont1
                         source: "../font/BebasNeue Regular.ttf"
@@ -455,21 +471,21 @@ Window {
                         text: qsTr("time to sleep:")
                     }
                     Label {
-                        id: timeToSleep1
+                        id: timeToSleepRemainTime
                         x: 81
                         y: 18
                         width: 79
                         height: 69
 
                         color: "#ff6860"
-                        text: qsTr("5 min")
+                        text: backend.remainTime()
                         font.pointSize: 13
                         font.family: bebasFont1.name
                     }
 
                     Rectangle {
                         id: sleepButton
-                         property string timeToSleepValue: "-"
+                        property string timeToSleepValue: "-"
                         x: 0
                         y: 46
                         width: 113
@@ -477,14 +493,14 @@ Window {
                         radius: 15
                         color: "#00d4e0"
 
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked:{
-                                sleepButton.timeToSleepValue = qsTr(textFieldFrom.text + "-" + textFieldTo.text)
+                        //                        MouseArea{
+                        //                            anchors.fill: parent
+                        //                            onClicked:{
+                        //                                sleepButton.timeToSleepValue = qsTr(textFieldFrom.text + "-" + textFieldTo.text)
 
-                                backend.getTimeFromToSleep(sleepButton.timeToSleepValue)
-                            }
-                        }
+                        //                                backend.getTimeFromToSleep(sleepButton.timeToSleepValue)
+                        //                            }
+                        //                        }
 
                         Label {
                             id: sleepAll
@@ -493,12 +509,81 @@ Window {
                             color: "white"
                             text: qsTr("SLEEP")
                             anchors.centerIn: parent
+                            property string duringTime: ""
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked:{
+                                    textFieldFrom.cursorVisible = false
+                                    textFieldTo.cursorVisible = false
+
+                                    var timeSplitFrom = ""
+                                    var timeSplitTo = ""
+                                    var hour = 0
+                                    var minute = 0
+
+                                    if(timeSplitFrom[0] != "" && timeSplitFrom[1] != "" && timeSplitTo[0] != "" && timeSplitTo[1] != ""){
+                                        notValid.opacity = 0
+                                        timeSplitFrom = (textFieldFrom.text).split(":")
+                                        hour = parseInt(timeSplitFrom[0])
+                                        minute = parseInt(timeSplitFrom[1])
+                                        textFieldFrom.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
+
+                                        timeSplitTo = (textFieldTo.text).split(":")
+                                        hour = parseInt(timeSplitTo[0])
+                                        minute = parseInt(timeSplitTo[1])
+
+                                        textFieldTo.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
+
+                                        sleepAll.duringTime = textFieldFrom.text + "-" + textFieldTo.text
+
+                                        backend.getTimeFromToSleep(sleepAll.duringTime)
+
+                                    }
+
+                                    timeSplitFrom = (textFieldFrom.text).split(":")
+                                    if (timeSplitFrom[0] == "" || timeSplitFrom[1] == ""){
+                                        notValid.opacity = 1
+                                        textFieldFrom.text = backend.currentTime()
+                                        timeSplitFrom = (textFieldFrom.text).split(":")
+                                        hour = parseInt(timeSplitFrom[0])
+                                        minute = parseInt(timeSplitFrom[1])
+
+                                        textFieldFrom.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
+                                    }
+
+
+
+
+                                    timeSplitTo = (textFieldTo.text).split(":")
+                                    if (timeSplitTo[0] == "" || timeSplitTo[1] == ""){
+                                        notValid.opacity = 1
+                                        textFieldTo.text = backend.currentTime()
+                                        if(minute>54){
+                                            minute = 0
+                                            if(hour == 23)hour = 0
+                                            else hour++
+                                        }
+                                        else minute+=5
+
+
+
+                                        textFieldTo.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
+                                    }
+
+
+
+
+
+
+
+                                }
+                            }
 
                         }
                     }
 
                     Rectangle {
-                        id: rectangle8
+                        id: timeRectangle
                         x: 126
                         y: 46
                         width: 221
@@ -521,7 +606,7 @@ Window {
                                 font.pointSize: 13
                                 placeholderText: qsTr("from")
                                 color: "black"
-
+                                text: backend.timeFromSleep()
                                 inputMask: "99:99"
                                 inputMethodHints: Qt.ImhDigitsOnly
                                 validator: RegExpValidator { regExp: /^([0-1\s]?[0-9\s]|2[0-3\s]):([0-5\s][0-9\s])$ / }
@@ -536,7 +621,7 @@ Window {
                                 font.pointSize: 13
                                 placeholderText: qsTr("to")
                                 color: "black"
-
+                                text: backend.timeToSleep()
                                 inputMask: "99:99"
                                 inputMethodHints: Qt.ImhDigitsOnly
                                 validator: RegExpValidator { regExp: /^([0-1\s]?[0-9\s]|2[0-3\s]):([0-5\s][0-9\s])$ / }
@@ -553,6 +638,91 @@ Window {
                             text: qsTr("-")
                             anchors.verticalCenterOffset: 0
                             anchors.horizontalCenterOffset: 4
+                        }
+
+                        Image {
+
+                            id: image1
+                            width: 53
+                            height: 30
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            source: "../images/icon/current.png"
+                            anchors.topMargin: 0
+                            anchors.bottomMargin: 0
+                            anchors.leftMargin: 10
+                            fillMode: Image.PreserveAspectFit
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked:{
+
+                                    textFieldFrom.text = backend.currentTime()
+                                    var timeSplitTo = (textFieldFrom.text).split(":")
+                                    var hour =0
+                                    var minute = 0
+
+                                    hour = parseInt(timeSplitTo [0])
+                                    minute = parseInt(timeSplitTo [1])
+
+                                    textFieldTo.text = backend.currentTime()
+                                    if(minute>54){
+                                        minute = 0
+                                        if(hour == 23)hour = 0
+                                        else hour++
+                                    }
+                                    else minute+=5
+                                    textFieldTo.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
+                                }
+
+
+                            }
+                        }
+
+                        Label {
+                            id: label1
+                            x: 177
+                            width: 26
+                            height: 30
+                            text: qsTr("+")
+
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked: {
+
+                                    var timeSplit = (textFieldTo.text).split(":")
+                                    if (timeSplit[0] == "" || timeSplit[1] == ""){
+                                        textFieldTo.text = backend.currentTime()
+                                        timeSplit = (textFieldTo.text).split(":")
+                                    }
+
+                                    var hour = parseInt(timeSplit[0])
+                                    var minute = parseInt(timeSplit[1])
+
+                                    if(minute>54){
+                                        minute = 0
+                                        if(hour == 23)hour = 0
+                                        else hour++
+                                    }
+                                    else minute+=5
+
+                                    textFieldTo.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
+
+
+
+
+                                }
+                            }
+
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            font.pointSize: 14
+                            anchors.topMargin: 0
+                            anchors.bottomMargin: 0
+                            anchors.rightMargin: 18
                         }
 
                     }
@@ -607,6 +777,22 @@ Window {
                         anchors.leftMargin: 8
                     }
 
+                    Label {
+                        id: notValid
+                        width: 113
+                        height: 13
+                        text: qsTr("not valid")
+                        opacity: 0
+                        color: "#ff6860"
+                        font.pointSize: 13
+                        font.family: bebasFont1.name
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        horizontalAlignment: Text.AlignHCenter
+                        anchors.topMargin: 82
+                        anchors.leftMargin: 0
+                    }
+
                     Rectangle {
                         id: countOfLedRectengle
                         y: 176
@@ -630,6 +816,7 @@ Window {
 
 
                     }
+
 
 
 
@@ -931,6 +1118,25 @@ Window {
 
 
 
+        Image {
+            id: save
+            x: 0
+            width: 27
+            height: 25
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            source: "../images/icon/save.png"
+            anchors.bottomMargin: 0
+            anchors.topMargin: 0
+            fillMode: Image.PreserveAspectFit
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    save.opacity = 1
+                }
+            }
+        }
+
         Label {
             FontLoader {
                 id: superionFont
@@ -1081,6 +1287,7 @@ Window {
         }
         MouseArea {
             anchors.fill: parent
+            anchors.leftMargin: 33
             anchors.rightMargin: 96
 
             onPressed: {
@@ -1099,6 +1306,7 @@ Window {
             }
 
         }
+
 
     }
 
@@ -1136,8 +1344,8 @@ Window {
 
         Label {
             font.family: bebasRegularFont
-              anchors.centerIn: parent
-              font.pointSize: 9
+            anchors.centerIn: parent
+            font.pointSize: 9
             id: label4
             color:"white"
             width: 73
@@ -1170,6 +1378,7 @@ Window {
     Connections{
         target:backend
     }
+
 
 }
 

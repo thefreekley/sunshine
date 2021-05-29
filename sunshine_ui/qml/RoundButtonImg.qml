@@ -44,7 +44,7 @@ Item {
             hoverEnabled: true
             anchors.fill: parent
             onClicked: {
-
+                save.opacity = 0.6
                 if (root.troggle == true) root.troggle= false
                 else root.troggle= true
 
@@ -118,8 +118,7 @@ Item {
                     lightButton4.troggle = false
                 }
                 if(imageSource == "../images/icon/sleep.png"){
-                      console.log(backend.currentTime())
-                      if (root.troggle) textFieldFrom.text = backend.currentTime()
+                    timerToSleep.running = root.troggle
                 }
 
                 aplicationWindow.callModeBackend()

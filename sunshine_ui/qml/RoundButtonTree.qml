@@ -50,7 +50,7 @@ Item {
 
 
             onEntered: {
-
+                save.opacity = 0.6
                 colorOverlayRoundImage.color = (troggle==false) ? "#c60100" : "white"
                 roundButtonImage.color = (troggle==true) ? "#c60100" : "white"
 

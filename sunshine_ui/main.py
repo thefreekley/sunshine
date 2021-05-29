@@ -4,7 +4,7 @@ import os
 import datetime
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
-from PySide2.QtCore import QObject, Slot, Signal
+from PySide2.QtCore import QObject, Slot, Signal, QTimer
 
 # import sqlite3
 #
@@ -14,8 +14,15 @@ from PySide2.QtCore import QObject, Slot, Signal
 color_1 = "#ff0100"
 color_2 = "#c60100"
 
-sleep_from = ""
-sleep_to = ""
+sleep_from = [0]*2
+sleep_to = [0]*2
+
+sleep_from = [22,33]
+sleep_to = [21,18]
+string_time_to_sleep = ""
+
+
+progress_percent = 0
 
 value_light = 50
 value_laud = 10
@@ -32,9 +39,60 @@ paint_troggle = False
 
 
 
+
 class MainWindow(QObject):
     def __init__(self):
         QObject.__init__(self)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.doWork)
+        if sleep_troggle:
+            self.timer.start(1000)
+
+
+
+    def doWork(self):
+        global sleep_to, sleep_from, progress_percent,string_time_to_sleep
+        curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
+        curent_second = (int(curent_time[0]))*60*60 + (int(curent_time[1]))*60 + (int(curent_time[2]))
+
+
+        from_in_seconds = sleep_from[0]*60*60 + sleep_from[1]*60
+        to_in_seconds = sleep_to[0]*60*60 + sleep_to[1]*60
+
+
+
+        if from_in_seconds < to_in_seconds and curent_second<to_in_seconds:
+            if curent_second - from_in_seconds >= 0:
+                delta_time = to_in_seconds - curent_second
+                progress_percent = 1-delta_time/(to_in_seconds - from_in_seconds)
+                time_string = (str(datetime.timedelta(seconds=delta_time ))).split(":")
+                string_time_to_sleep = (time_string[0] + " h " ) if int(time_string[0]) >  0 else ""
+                string_time_to_sleep = string_time_to_sleep + (time_string[1] + " min ") if int(time_string[1]) > 0 else ""
+                string_time_to_sleep = string_time_to_sleep + (time_string[2] + " sec ") if int(time_string[2]) > 0 else ""
+
+        elif from_in_seconds < to_in_seconds and curent_second>to_in_seconds:
+            progress_percent = 1
+            string_time_to_sleep = "Finish"
+
+        #need fix
+        if from_in_seconds > to_in_seconds:
+
+            if curent_second < to_in_seconds:
+                curent_second = curent_second + 24 * 60*60
+
+            if curent_second - from_in_seconds >= 0:
+                delta_time = to_in_seconds - curent_second
+                progress_percent = 1-delta_time/(to_in_seconds - from_in_seconds)
+                time_string = (str(datetime.timedelta(seconds= abs(delta_time)))).split(":")
+                string_time_to_sleep = (time_string[0] + " h ") if int(time_string[0]) > 0 else ""
+                string_time_to_sleep = string_time_to_sleep + (time_string[1] + " min ") if int(time_string[1]) > 0 else ""
+                string_time_to_sleep = string_time_to_sleep + (time_string[2] + " sec ") if int( time_string[2]) > 0 else ""
+
+
+
+
+
+
 
 
     @Slot(result=int)
@@ -87,24 +145,40 @@ class MainWindow(QObject):
     @Slot(result=str)
     def timeToSleep(self):
         global sleep_to
-        return sleep_to
+        return str(sleep_to[0]) + ":" + str(sleep_to[1])
 
     @Slot(result=str)
     def timeFromSleep(self):
         global sleep_from
-        return sleep_from
+        return str(sleep_from[0]) + ":" + str(sleep_from[1])
 
     @Slot(result=str)
     def currentTime(self):
         return str(datetime.datetime.now(tz=None))[11:16]
 
+    @Slot(result=str)
+    def remainTime(self):
+        global string_time_to_sleep
+        return string_time_to_sleep
+
+    @Slot(result=float)
+    def progressBarValue(self):
+        global progress_percent
+        return progress_percent
 
     @Slot(str)
     def getTimeFromToSleep(self, value):
         global sleep_from, sleep_to
         split_value = value.split("-")
-        sleep_from = split_value[0]
-        sleep_to = split_value[1]
+
+        sleep_from[0] = int(split_value[0].split(":")[0])
+        sleep_from[1] = int(split_value[0].split(":")[1])
+
+        sleep_to[0] = int(split_value[1].split(":")[0])
+        sleep_to[1] = int(split_value[1].split(":")[1])
+
+
+
 
 
 
@@ -119,6 +193,14 @@ class MainWindow(QObject):
         off_troggle = troggleOff
         sleep_troggle = troggleSleep
         paint_troggle = trooglePaint
+
+        self.suport_mod(sleep = troggleSleep)
+
+    def suport_mod(self, sleep=False):
+        if sleep:
+            self.timer.start(1000)
+        else:
+            self.timer.stop()
 
     @Slot(bool, bool, bool, bool, bool, bool, bool, bool)
     def getMusicTroggle(self, musicTroggle1, musicTroggle2, musicTroggle3, musicTroggle4, musicTroggle5,musicTroggle6,musicTroggle7,musicTroggle8):
@@ -142,6 +224,8 @@ class MainWindow(QObject):
             elif lightTroggle2: light_mode = 2
             elif lightTroggle3: light_mode = 3
             elif lightTroggle4:light_mode = 4
+
+
 
 
 

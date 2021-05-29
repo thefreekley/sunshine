@@ -77,6 +77,7 @@ Item{
 
             }
             onClicked: {
+                save.opacity = 0.6
                 if(iconMusic.troggle == true){
                 smallButtonMusic1.troggle = false
                 smallButtonMusic2.troggle = false
