@@ -1076,15 +1076,52 @@ Window {
                 }
 
                 Row {
-                    id: row5
-                    x: 803
-                    width: 308
+                    id: equalizerBar
+                    x: 823
+                    width: 288
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    anchors.topMargin: 0
-                    anchors.bottomMargin: 42
-                    anchors.rightMargin: 39
+                    anchors.topMargin: 51
+                    anchors.bottomMargin: 32
+                    anchors.rightMargin:0
+
+
+
+
+                    EqualizerItem {
+                        id: lineEqualizer1
+                        line_idex:0
+                        color_item: "#ff6861"
+                    }
+
+                    EqualizerItem {
+                        id: lineEqualizer2
+                        line_idex:2
+                        color_item: "#00d2df"
+                    }
+
+                    EqualizerItem {
+                        id: lineEqualizer3
+                        line_idex:3
+                        color_item: "#ffd300"
+                    }
+
+                    EqualizerItem{
+                        id: lineEqualizer4
+                        line_idex:4
+                        color_item: "#ff6861"
+                    }
+                    EqualizerItem{
+                        id: lineEqualizer5
+                        line_idex:5
+                        color_item: "#00d2df"
+                    }
+                    EqualizerItem{
+                        id: lineEqualizer6
+                        line_idex:6
+                        color_item: "#ffd300"
+                    }
                 }
             }
 
@@ -1120,17 +1157,19 @@ Window {
 
         Image {
             id: save
-            x: 0
-            width: 27
-            height: 25
+            width: 20
+            height: 20
+            anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             source: "../images/icon/save.png"
+            anchors.leftMargin: 10
             anchors.bottomMargin: 0
             anchors.topMargin: 0
             fillMode: Image.PreserveAspectFit
             MouseArea {
                 anchors.fill: parent
+                anchors.rightMargin: 0
                 onClicked: {
                     save.opacity = 1
                 }
@@ -1287,7 +1326,7 @@ Window {
         }
         MouseArea {
             anchors.fill: parent
-            anchors.leftMargin: 33
+            anchors.leftMargin: 78
             anchors.rightMargin: 96
 
             onPressed: {
@@ -1305,6 +1344,38 @@ Window {
                 aplicationWindow.setY(aplicationWindow.y + dy)
             }
 
+        }
+
+        Image {
+            id: equalizerTroggle
+            property bool troggle_eq: true
+            opacity: 1
+            x: 33
+            width: 29
+            height: 25
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            source: "../images/icon/equalizer.png"
+            fillMode: Image.PreserveAspectFit
+            MouseArea {
+                anchors.fill: parent
+                anchors.leftMargin: 0
+                onClicked: {
+
+
+
+                    equalizerTroggle.troggle_eq = !equalizerTroggle.troggle_eq
+
+                    backend.troggleEqualizer(equalizerTroggle.troggle_eq)
+
+                    if(equalizerTroggle.troggle_eq) equalizerTroggle.opacity = 1
+                    else equalizerTroggle.opacity = 0.5
+
+
+                }
+            }
+            anchors.topMargin: 0
+            anchors.bottomMargin: 0
         }
 
 

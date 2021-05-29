@@ -5,6 +5,7 @@ import datetime
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
 from PySide2.QtCore import QObject, Slot, Signal, QTimer
+from amplitude_level import AmplitudeLevel
 
 # import sqlite3
 #
@@ -19,7 +20,9 @@ sleep_to = [0]*2
 
 sleep_from = [22,33]
 sleep_to = [21,18]
+current_day = 0
 string_time_to_sleep = ""
+
 
 
 progress_percent = 0
@@ -37,8 +40,8 @@ sleep_troggle = False
 paint_troggle = False
 
 
-
-
+audio_input = AmplitudeLevel()
+coef_frequence = []
 
 class MainWindow(QObject):
     def __init__(self):
@@ -48,10 +51,42 @@ class MainWindow(QObject):
         if sleep_troggle:
             self.timer.start(1000)
 
+        self.timer_equalizer = QTimer()
+        self.timer_equalizer.timeout.connect(self.equalizerCurves)
+        self.timer_equalizer.start(50)
 
+    def equalizerCurves(self):
+        global coef_frequence
+        coef_frequence = []
+        fft_out = audio_input.get_fft()
+
+        for i in range(len(fft_out)):
+            a = int(fft_out[i]/40)
+            if a>200:
+                a =200
+            coef_frequence.append(a)
+
+
+
+    @Slot(bool)
+    def troggleEqualizer(self,troggle):
+        global coef_frequence
+        if troggle : self.timer_equalizer.start(50)
+        else:
+            self.timer_equalizer.stop()
+            coef_frequence= [0]*len(coef_frequence)
+
+
+    @Slot(int,result=int)
+    def equalizerLine(self,index):
+
+        global coef_frequence
+
+        return coef_frequence[index]
 
     def doWork(self):
-        global sleep_to, sleep_from, progress_percent,string_time_to_sleep
+        global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day
+
         curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
         curent_second = (int(curent_time[0]))*60*60 + (int(curent_time[1]))*60 + (int(curent_time[2]))
 
@@ -75,14 +110,14 @@ class MainWindow(QObject):
             string_time_to_sleep = "Finish"
 
         #need fix
-        if from_in_seconds > to_in_seconds:
+        new_current_day = int(datetime.date.today().day)
+        if (from_in_seconds+ (24 * 60*60)*(current_day- new_current_day)) < (to_in_seconds + (24 * 60*60) ):
 
-            if curent_second < to_in_seconds:
-                curent_second = curent_second + 24 * 60*60
+            curent_second = curent_second + (24 * 60*60)*(current_day- new_current_day)
 
             if curent_second - from_in_seconds >= 0:
-                delta_time = to_in_seconds - curent_second
-                progress_percent = 1-delta_time/(to_in_seconds - from_in_seconds)
+                delta_time = (to_in_seconds + 24*60*60) - curent_second
+                progress_percent = 1-delta_time/((to_in_seconds + 24*60*60) - (from_in_seconds+ (24 * 60*60)*(current_day- new_current_day)))
                 time_string = (str(datetime.timedelta(seconds= abs(delta_time)))).split(":")
                 string_time_to_sleep = (time_string[0] + " h ") if int(time_string[0]) > 0 else ""
                 string_time_to_sleep = string_time_to_sleep + (time_string[1] + " min ") if int(time_string[1]) > 0 else ""
@@ -168,7 +203,7 @@ class MainWindow(QObject):
 
     @Slot(str)
     def getTimeFromToSleep(self, value):
-        global sleep_from, sleep_to
+        global sleep_from, sleep_to,current_day
         split_value = value.split("-")
 
         sleep_from[0] = int(split_value[0].split(":")[0])
@@ -176,6 +211,8 @@ class MainWindow(QObject):
 
         sleep_to[0] = int(split_value[1].split(":")[0])
         sleep_to[1] = int(split_value[1].split(":")[1])
+
+        current_day =int(datetime.date.today().day)
 
 
 
