@@ -7,37 +7,65 @@ from PySide2.QtQml import QQmlApplicationEngine
 from PySide2.QtCore import QObject, Slot, Signal, QTimer
 from amplitude_level import AmplitudeLevel
 
-# import sqlite3
-#
-# conn = sqlite3.connect("database_sunshine.db") # или :memory: чтобы сохранить в RAM
-# cursor = conn.cursor()
+import sqlite3
 
-color_1 = "#ff0100"
-color_2 = "#c60100"
+conn = sqlite3.connect("database_sunshine.db")
+cursor = conn.cursor()
 
-sleep_from = [0]*2
-sleep_to = [0]*2
+def boolint(boolean):
+    return 1 if boolean else 0
 
-sleep_from = [22,33]
-sleep_to = [21,18]
-current_day = 0
+def intbool(integer):
+    return True if integer==1 else False
+
+cursor.execute("SELECT * FROM info")
+info_database = cursor.fetchall()
+
 string_time_to_sleep = ""
-
-
-
+current_day = 0
 progress_percent = 0
 
-value_light = 50
-value_laud = 10
+print(info_database)
 
-music_mode = 2
-light_mode = 1
+if len(info_database) == 0:
 
-wand_troggle = False
-music_troggle = False
-off_troggle = False
-sleep_troggle = False
-paint_troggle = False
+    current_id = 0
+
+    color_1 = "#ff0100"
+    color_2 = "#c60100"
+
+    sleep_from = [0]*2
+    sleep_to = [0]*2
+
+    sleep_from = [22,33]
+    sleep_to = [21,18]
+
+    value_light = 50
+    value_laud = 10
+
+    music_mode = 2
+    light_mode = 1
+
+    wand_troggle = True
+    music_troggle = False
+    off_troggle = False
+    sleep_troggle = False
+    paint_troggle = False
+else:
+    current_id = info_database[0][0]
+    wand_troggle = intbool(info_database[0][1])
+    music_troggle = intbool(info_database[0][2])
+    off_troggle = intbool(info_database[0][3])
+    sleep_troggle = intbool(info_database[0][4])
+    paint_troggle = intbool(info_database[0][5])
+    sleep_from =[info_database[0][6],info_database[0][7]]
+    sleep_to =[info_database[0][8],info_database[0][9]]
+    value_light = info_database[0][10]
+    value_laud = info_database[0][11]
+    music_mode = info_database[0][12]
+    light_mode = info_database[0][13]
+    color_1 = info_database[0][14]
+    color_2 = info_database[0][15]
 
 
 audio_input = AmplitudeLevel()
@@ -88,40 +116,33 @@ class MainWindow(QObject):
         global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day
 
         curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
-        curent_second = (int(curent_time[0]))*60*60 + (int(curent_time[1]))*60 + (int(curent_time[2]))
+        current_second = (int(curent_time[0]))*60*60 + (int(curent_time[1]))*60 + (int(curent_time[2]))
+
 
 
         from_in_seconds = sleep_from[0]*60*60 + sleep_from[1]*60
         to_in_seconds = sleep_to[0]*60*60 + sleep_to[1]*60
 
+        new_current_day = int(datetime.date.today().day)
+        current_second = current_second + (24 * 60 * 60) * (current_day - new_current_day)
 
+        if to_in_seconds<from_in_seconds:
+            to_in_seconds = to_in_seconds + 24*60*60
 
-        if from_in_seconds < to_in_seconds and curent_second<to_in_seconds:
-            if curent_second - from_in_seconds >= 0:
-                delta_time = to_in_seconds - curent_second
+        if current_second<to_in_seconds:
+            if current_second - from_in_seconds >= 0:
+                delta_time = to_in_seconds - current_second
                 progress_percent = 1-delta_time/(to_in_seconds - from_in_seconds)
                 time_string = (str(datetime.timedelta(seconds=delta_time ))).split(":")
                 string_time_to_sleep = (time_string[0] + " h " ) if int(time_string[0]) >  0 else ""
                 string_time_to_sleep = string_time_to_sleep + (time_string[1] + " min ") if int(time_string[1]) > 0 else ""
                 string_time_to_sleep = string_time_to_sleep + (time_string[2] + " sec ") if int(time_string[2]) > 0 else ""
 
-        elif from_in_seconds < to_in_seconds and curent_second>to_in_seconds:
+        else:
             progress_percent = 1
             string_time_to_sleep = "Finish"
 
-        #need fix
-        new_current_day = int(datetime.date.today().day)
-        if (from_in_seconds+ (24 * 60*60)*(current_day- new_current_day)) < (to_in_seconds + (24 * 60*60) ):
 
-            curent_second = curent_second + (24 * 60*60)*(current_day- new_current_day)
-
-            if curent_second - from_in_seconds >= 0:
-                delta_time = (to_in_seconds + 24*60*60) - curent_second
-                progress_percent = 1-delta_time/((to_in_seconds + 24*60*60) - (from_in_seconds+ (24 * 60*60)*(current_day- new_current_day)))
-                time_string = (str(datetime.timedelta(seconds= abs(delta_time)))).split(":")
-                string_time_to_sleep = (time_string[0] + " h ") if int(time_string[0]) > 0 else ""
-                string_time_to_sleep = string_time_to_sleep + (time_string[1] + " min ") if int(time_string[1]) > 0 else ""
-                string_time_to_sleep = string_time_to_sleep + (time_string[2] + " sec ") if int( time_string[2]) > 0 else ""
 
 
 
@@ -139,6 +160,15 @@ class MainWindow(QObject):
     def musicModeNumber(self):
         global music_mode
         return music_mode
+
+    @Slot(str,result=bool)
+    def modeNumber(self,item):
+        if item== "wand": return wand_troggle
+        elif item == "music": return music_troggle
+        elif item == "off":return off_troggle
+        elif item == "sleep":return sleep_troggle
+        elif item == "paint": return paint_troggle
+
 
     @Slot(result=int)
     def lightSliderValue(self):
@@ -180,12 +210,12 @@ class MainWindow(QObject):
     @Slot(result=str)
     def timeToSleep(self):
         global sleep_to
-        return str(sleep_to[0]) + ":" + str(sleep_to[1])
+        return str(sleep_to[0]) + ("0" if sleep_to[0]==0 else "") + ":" + str(sleep_to[1]) + ("0" if sleep_to[1]==0 else "")
 
     @Slot(result=str)
     def timeFromSleep(self):
         global sleep_from
-        return str(sleep_from[0]) + ":" + str(sleep_from[1])
+        return str(sleep_from[0]) + ("0" if sleep_from[0]==0 else "") + ":" + str(sleep_from[1]) + ("0" if sleep_from[1]==0 else "")
 
     @Slot(result=str)
     def currentTime(self):
@@ -200,6 +230,10 @@ class MainWindow(QObject):
     def progressBarValue(self):
         global progress_percent
         return progress_percent
+
+    @Slot()
+    def saveInfo(self):
+        save()
 
     @Slot(str)
     def getTimeFromToSleep(self, value):
@@ -263,6 +297,15 @@ class MainWindow(QObject):
             elif lightTroggle4:light_mode = 4
 
 
+
+def save():
+    list_save = [current_id, boolint(wand_troggle), boolint(music_troggle), boolint(off_troggle), boolint(sleep_troggle), boolint(paint_troggle),
+                 int(sleep_from[0]),int(sleep_from[1]),int(sleep_to[0]),int(sleep_to[1]),value_light,value_laud,music_mode,light_mode,color_1,color_2
+    ]
+    cursor.execute("DELETE FROM info WHERE id = ?",[current_id])
+    print(list_save)
+    cursor.execute("INSERT INTO info  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", list_save)
+    conn.commit()
 
 
 

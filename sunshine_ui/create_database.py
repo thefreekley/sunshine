@@ -5,23 +5,26 @@ cursor = conn.cursor()
 
 
 
-wand_troggle = False
-music_troggle = False
-off_troggle = False
-sleep_troggle = False
-paint_troggle = False
 
-cursor.execute("""CREATE TABLE info
-                  (int id, 
-                  boolean wand_troggle,
-                  boolean music_troggle,
-                  boolean off_troggle,
-                  boolean sleep_troggle,
-                  boolean paint_troggle,
-                  
-                   
-                   release_date text,
-                   publisher text, media_type text)
-               """)
+
+cursor.execute( """ CREATE TABLE info (
+                  id INT  PRIMARY KEY  NOT NULL, 
+                   wand_troggle INT NOT NULL,
+                   music_troggle INT NOT NULL,
+                   off_troggle INT NOT NULL,
+                   sleep_troggle INT NOT NULL,
+                   paint_troggle INT NOT NULL,
+                   sleep_from_h INT NOT NULL,
+                   sleep_from_m INT NOT NULL,
+                   sleep_to_h INT NOT NULL,
+                   sleep_to_m INT NOT NULL,
+                   value_light INT NOT NULL,
+                   value_laud INT NOT NULL,
+                   music_mode INT NOT NULL,
+                   light_mode INT NOT NULL,
+                   color_1 TEXT  NOT NULL,
+                   color_2 TEXT  NOT NULL
+                   ) """ )
+
 
 conn.commit()
