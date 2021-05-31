@@ -61,6 +61,8 @@ Window {
                 anchors.leftMargin: 0
                 anchors.topMargin: 29
 
+
+
                 Rectangle {
                     id: rectangle2
                     x: 390
@@ -162,12 +164,9 @@ Window {
                     width: 214
                     height: 579
 
-                    RectangleLabel {
-                        textLabel: "on"
-                    }
 
                     RectangleLabel {
-                        textLabel: "77 88"
+                        textLabel: "on"
                     }
 
                     RectangleLabel {
@@ -178,12 +177,18 @@ Window {
                         textLabel: "Stereo mixer"
                     }
 
+                    CustomCombobox {
+
+                    }
+
                     Rectangle{
 
                         id: rectangle10
                         height: 350
                         width: parent.width
                         color: "#00000000"
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 20
                         Rectangle {
                             property int timeGradient: 5000
                             anchors.centerIn: parent
@@ -327,6 +332,7 @@ Window {
 
                         }
 
+
                         Rectangle {
                             id: colorButton2
                             x: 56
@@ -398,6 +404,7 @@ Window {
 
 
                     }
+
                 }
 
                 Rectangle {
@@ -777,6 +784,7 @@ Window {
                         anchors.leftMargin: 8
                     }
 
+
                     Label {
                         id: notValid
                         width: 113
@@ -836,6 +844,10 @@ Window {
                 anchors.bottomMargin: 0
                 anchors.rightMargin: 0
                 anchors.leftMargin: 0
+
+
+
+
 
                 Rectangle {
                     id: rectangle5
