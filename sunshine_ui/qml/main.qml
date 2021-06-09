@@ -322,7 +322,8 @@ Window {
 
                     Rectangle{
 
-                        id: rectangle10
+                        id: rectanglePaint
+                        property bool sameColor: false
                         height: 350
                         width: parent.width
                         color: "#00000000"
@@ -486,7 +487,9 @@ Window {
 
                             MouseArea {
                                 anchors.fill: parent
-                                onClicked: colorDialog2.open()
+                                onClicked: {
+                                   if(!rectanglePaint.sameColor) colorDialog2.open()
+                                }
                                 hoverEnabled: true
                                 onEntered: { colorDialogWidth2Up.start(); colorDialogHeight2Up.start();}
                                 onExited: { colorDialogWidth2Down.start(); colorDialogHeight2Down.start();}
@@ -514,14 +517,53 @@ Window {
                             fillMode: Image.PreserveAspectFit
                         }
 
+                        Image {
+
+                            id: twoArrow
+                            x: 128
+                            width: 24
+                            opacity: rectanglePaint.sameColor ? 0.6 : 1
+                            anchors.top: parent.top
+                            anchors.bottom: parent.bottom
+                            source: "../images/icon/two_arrow.png"
+                            anchors.bottomMargin: 144
+                            anchors.topMargin: 160
+                            fillMode: Image.PreserveAspectFit
+                            MouseArea{
+                                anchors.fill: parent
+                                onClicked:{
+                                    rectanglePaint.sameColor = !rectanglePaint.sameColor
+                                    twoArrow.opacity =  rectanglePaint.sameColor ? 0.6 : 1
+                                    colorButton2.opacity =  rectanglePaint.sameColor ? 0 : 1
+                                    if(rectanglePaint.sameColor){
+                                        colorDialog2.color = colorDialog1.color
+                                        gradientPaintTop.restart()
+                                        gradientPaintBottom.restart()
+                                        gradientPaintMiddle.restart()
+
+
+                                    }
+                                }
+                            }
+                        }
+
                         ColorDialog {
                             id: colorDialog1
                             title: qsTr("choose the color")
                             onAccepted: {
+
+                                backend.getCollorPallet(colorDialog1.color,1)
+                                if(rectanglePaint.sameColor){
+                                    colorDialog2.color = colorDialog1.color
+                                    backend.getCollorPallet(colorDialog1.color,2)
+                                }
+
                                 gradientPaintTop.restart()
                                 gradientPaintBottom.restart()
                                 gradientPaintMiddle.restart()
-                                backend.getCollorPallet(colorDialog1.color,1)
+
+
+
                             }
 
                             color: backend.colorOnePallete()
@@ -538,6 +580,7 @@ Window {
                             }
                             color: backend.colorTwoPallete()
                         }
+
 
 
 

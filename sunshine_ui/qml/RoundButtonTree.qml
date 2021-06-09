@@ -45,6 +45,7 @@ Item {
             onClicked: {
                 root.clicked()
                 root.troggle = (root.troggle == true) ? false : true
+                backend.getTieConnect(root.troggle)
             }
 
 

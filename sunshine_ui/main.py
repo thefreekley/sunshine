@@ -6,12 +6,17 @@ from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
 from PySide2.QtCore import QObject, Slot, Signal, QTimer
 from amplitude_level import AmplitudeLevel
-
+from PIL import ImageColor
+import time
 import sqlite3
+import serial
+from builtins import chr
 
 conn = sqlite3.connect("database_sunshine.db")
 cursor = conn.cursor()
 
+ser = serial.Serial('COM5', 9600, timeout=0)
+delta_time = 0
 def boolint(boolean):
     return 1 if boolean else 0
 
@@ -24,6 +29,7 @@ info_database = cursor.fetchall()
 string_time_to_sleep = ""
 current_day = 0
 progress_percent = 0
+tie_device = False
 
 print(info_database)
 
@@ -113,7 +119,7 @@ class MainWindow(QObject):
         return coef_frequence[index]
 
     def doWork(self):
-        global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day
+        global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day,delta_time
 
         curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
         current_second = (int(curent_time[0]))*60*60 + (int(curent_time[1]))*60 + (int(curent_time[2]))
@@ -175,10 +181,6 @@ class MainWindow(QObject):
         global value_light
         return value_light
 
-    @Slot(int)
-    def getSliderLightValue(self,value):
-        global value_light
-        value_light = value
 
     @Slot(str)
     def getId(self,id_string):
@@ -189,6 +191,10 @@ class MainWindow(QObject):
     def getSliderLightValue(self, value):
         global value_light
         value_light = value
+        items = list()
+        items.append(value_light)
+        toController(broadcast=tie_device, id=current_id, mode=4, item=items)
+        time.sleep(0.05)
 
     @Slot(result=int)
     def loudSliderValue(self):
@@ -199,6 +205,10 @@ class MainWindow(QObject):
     def getSliderLoundValue(self, value):
         global value_laud
         value_laud = value
+        items = list()
+        items.append(value_laud)
+        toController(broadcast=tie_device, id=current_id, mode=5, item=items)
+        time.sleep(0.05)
 
     @Slot(result=str)
     def colorOnePallete(self):
@@ -213,9 +223,21 @@ class MainWindow(QObject):
 
     @Slot(str,int)
     def getCollorPallet(self, value, index):
-        global color_1,color_2
+        global color_1,color_2,paint_troggle
         if index==1: color_1 = value
         elif index == 2: color_2 = value
+        if paint_troggle:
+            items = list()
+            items.append(ImageColor.getcolor(color_1, "RGB")[0])
+            items.append(ImageColor.getcolor(color_1, "RGB")[1])
+            items.append(ImageColor.getcolor(color_1, "RGB")[2])
+
+            items.append(ImageColor.getcolor(color_2, "RGB")[0])
+            items.append(ImageColor.getcolor(color_2, "RGB")[1])
+            items.append(ImageColor.getcolor(color_2, "RGB")[2])
+
+            toController(broadcast=tie_device,id=current_id,mode=7,item=items)
+
 
     @Slot(result=str)
     def timeToSleep(self):
@@ -233,13 +255,20 @@ class MainWindow(QObject):
 
     @Slot(result=str)
     def remainTime(self):
-        global string_time_to_sleep
+        global string_time_to_sleep,delta_time
+         
         return string_time_to_sleep
 
     @Slot(result=float)
     def progressBarValue(self):
         global progress_percent
         return progress_percent
+
+    @Slot(bool)
+    def getTieConnect(self,tie):
+        global tie_device
+        tie_device = tie
+
 
     @Slot()
     def saveInfo(self):
@@ -268,12 +297,36 @@ class MainWindow(QObject):
 
     @Slot(bool, bool, bool, bool, bool)
     def getModeTroggle(self, troggleWand, troggleMusic, troggleOff, troggleSleep, trooglePaint):
-        global wand_troggle,music_troggle,off_troggle,sleep_troggle,paint_troggle
+        global wand_troggle,music_troggle,off_troggle,sleep_troggle,paint_troggle,music_mode,light_mode,color_1,color_2
         wand_troggle = troggleWand
         music_troggle = troggleMusic
         off_troggle = troggleOff
         sleep_troggle = troggleSleep
         paint_troggle = trooglePaint
+        if wand_troggle:
+            toController(broadcast=tie_device, id=current_id, mode=2, item=[music_mode])
+            time.sleep(0.05)
+        if music_troggle:
+            toController(broadcast=tie_device, id=current_id, mode=1, item=[light_mode])
+            time.sleep(0.05)
+        if off_troggle:
+            toController(broadcast=tie_device, id=current_id, mode=3, item=[1 if off_troggle else 0])
+            time.sleep(0.05)
+        if sleep_troggle:
+            toController(broadcast=tie_device, id=current_id, mode=3, item=[1 if off_troggle else 0])
+            time.sleep(0.05)
+        if paint_troggle:
+            items = list()
+            items.append(ImageColor.getcolor(color_1, "RGB")[0])
+            items.append(ImageColor.getcolor(color_1, "RGB")[1])
+            items.append(ImageColor.getcolor(color_1, "RGB")[2])
+
+            items.append(ImageColor.getcolor(color_2, "RGB")[0])
+            items.append(ImageColor.getcolor(color_2, "RGB")[1])
+            items.append(ImageColor.getcolor(color_2, "RGB")[2])
+
+            toController(broadcast=tie_device, id=current_id, mode=7, item=items)
+
 
         self.suport_mod(sleep = troggleSleep)
 
@@ -296,6 +349,8 @@ class MainWindow(QObject):
             elif musicTroggle6: music_mode = 6
             elif musicTroggle7:music_mode = 7
             elif musicTroggle8: music_mode = 8
+            toController(broadcast=tie_device, id=current_id, mode=1, item=[music_mode])
+            time.sleep(0.05)
 
     @Slot(bool, bool, bool, bool)
     def getLightTroggle(self, lightTroggle1, lightTroggle2, lightTroggle3, lightTroggle4):
@@ -305,6 +360,22 @@ class MainWindow(QObject):
             elif lightTroggle2: light_mode = 2
             elif lightTroggle3: light_mode = 3
             elif lightTroggle4:light_mode = 4
+            toController(broadcast=tie_device, id=current_id, mode=2, item=[light_mode])
+            time.sleep(0.05)
+
+
+def toController(broadcast, id, mode,item):
+
+    if broadcast is False:
+        ser.write(bytes([0]))
+        ser.write(bytes([id]))
+    else:
+        ser.write(bytes([1]))
+
+    ser.write(bytes([mode]))
+
+    for i in item:
+        ser.write(bytes([i]))
 
 
 

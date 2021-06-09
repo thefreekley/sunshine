@@ -33,14 +33,15 @@ void setup(){
 
   radio.powerUp(); 
   radio.stopListening();  
+  
 }
 
 void loop(void) { 
 
   if (Serial.available()) {
-     byte number = Serial.read() - '0' ;
-     if(number == 218) return;
-     Serial.println(number);
+     byte number = Serial.read();  
+  
+    
      if (counter==0){ 
         broadcast = (number==0) ? false : true;
         if (number==1)counter++;   
@@ -49,11 +50,11 @@ void loop(void) {
      else if (counter==2) command = number;
      else if (counter==3){
         items[0] = number;
-        if(command == 1 || command == 2 || command == 3 || command == 4 )process = true;
+        if(command == 1 || command == 2 || command == 3 || command == 4 || command == 5 )process = true;
      }
      else if (counter==4){
         items[1] = number;
-        if(command == 5)process = true;
+        if(command == 6)process = true;
      }
      else{
         items[counter-3] = (byte)number;
@@ -71,12 +72,12 @@ void loop(void) {
       sendTo( broadcast ? 1:0);
       if(!broadcast)sendTo(currentId);
       sendTo(command);
-      if(command == 1 || command == 2 || command == 3 || command == 4 )sendTo(items[0]);
-      else if(command == 5){
+      if(command == 1 || command == 2 || command == 3 || command == 4 || command == 5 )sendTo(items[0]);
+      else if(command == 6){
         sendTo(items[0]);
         sendTo(items[1]); 
       }
-      else if(command == 6){
+      else if(command == 7){
         sendTo(items[0]);
         sendTo(items[1]);
         sendTo(items[2]);
