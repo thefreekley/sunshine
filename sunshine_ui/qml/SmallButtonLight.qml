@@ -6,6 +6,7 @@ import QtQuick.Templates 2.0 as T
 
 Item{
      property string imageSource: "value"
+    property string label_text: "value"
     property bool troggle: false
     id: root
 
@@ -51,6 +52,7 @@ Item{
                 smallRound.color = (troggle==true) ? "#ffd400" : "#00000000"
             }
             onClicked: {
+
                 save.opacity = 0.6
                 lightButton1.troggle = false
                 lightButton2.troggle = false

@@ -180,6 +180,16 @@ class MainWindow(QObject):
         global value_light
         value_light = value
 
+    @Slot(str)
+    def getId(self,id_string):
+
+        print( int(id_string[3:]))
+
+    @Slot(int)
+    def getSliderLightValue(self, value):
+        global value_light
+        value_light = value
+
     @Slot(result=int)
     def loudSliderValue(self):
         global value_laud

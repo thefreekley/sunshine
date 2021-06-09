@@ -24,6 +24,8 @@ Window {
 
         backend.getMusicTroggle(smallButtonMusic1.troggle,smallButtonMusic2.troggle,smallButtonMusic3.troggle,smallButtonMusic4.troggle,
                                 smallButtonMusic5.troggle,smallButtonMusic6.troggle,smallButtonMusic7.troggle,smallButtonMusic8.troggle)
+
+        save.opacity = 0.8
     }
 
     FontLoader {
@@ -77,7 +79,7 @@ Window {
 
                     Label {
                         id: label
-                        text: qsTr("ID: 7732")
+                        text: qsTr("ID:77")
                         font.family: bebasRegularFont.name
                         anchors.centerIn: parent
                         anchors.top: parent.top
@@ -165,21 +167,158 @@ Window {
                     height: 579
 
 
-                    RectangleLabel {
-                        textLabel: "on"
-                    }
 
-                    RectangleLabel {
-                        textLabel: "HC-06"
-                    }
 
-                    RectangleLabel {
-                        textLabel: "Stereo mixer"
+                    CustomCombobox {
+                        id: idCombobox
+                        new_model: ListModel{
+                            ListElement { text: "id:77"}
+                            ListElement { text: "id:88"}
+
+                        }
                     }
 
                     CustomCombobox {
+                        y: 50
+                        id: compCombobox
+                        new_model: ListModel{
+                            ListElement { text: "COMP4"}
+                            ListElement { text: "COMP3"}
+                            ListElement { text: "COMP5"}
+
+                        }
 
                     }
+                    CustomCombobox {
+                        id: inputCombobox
+                        y:100
+                        new_model: ListModel{
+                            ListElement { text: "Stereo Mixer"}
+                            ListElement { text: "ASUS VH222"}
+                            ListElement { text: "MICRO 3-USB"}
+
+                        }
+
+                    }
+
+                    Rectangle{
+                        color: "#ffd400"
+                        y:150
+                        width:210
+                        height: 32
+                        radius: height/2
+                    TextField {
+                        x: 20
+                        id: idInput
+                        horizontalAlignment: "AlignHCenter"
+                        width:100
+                        font.family: bebasFont1.name
+                        font.pointSize: 13
+                        placeholderText: qsTr("ID:")
+                        color: "black"
+
+                        inputMethodHints: Qt.ImhDigitsOnly
+                        validator: RegExpValidator { regExp: /^\d+$/  }
+
+                        background: Rectangle { color: "#ffd400" }
+                    }
+                    }
+
+                    Rectangle{
+                        id: rectangleAddDevice
+                        color: "#ffd400"
+                        y:155
+                        x:130
+                        width:24
+                        height:24
+                        radius: height/2
+                        Label {
+                            anchors.centerIn: parent
+                            id: addDevice
+                            horizontalAlignment: "AlignHCenter"
+                            font.family: bebasFont1.name
+                            font.pointSize: 23
+                            color: "black"
+                            text: qsTr("+")
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+
+                            hoverEnabled: true
+
+                            onEntered: { addDevice.color = "#ffd400"; rectangleAddDevice.color="black" }
+                            onExited: { addDevice.color = "black"; rectangleAddDevice.color="#ffd400" }
+
+                            onClicked:{
+                               idInput.cursorVisible = false
+
+                                var sameId = 0
+                                for(var i=0; i< idCombobox.new_model.count;i++){
+                                    var item = idCombobox.new_model.get(i).text
+
+                                    console.log(item,idInput.text.toString())
+                                    if(item == ("id:" + idInput.text.toString())){
+                                        sameId = 1
+                                    }
+                                }
+
+                               if(sameId == 0 && idInput.text.toString()!="") idCombobox.new_model.append({ text: "id:" + idInput.text.toString()} )
+                                idInput.text = ""
+                            }
+
+                        }
+
+                    }
+
+                    Rectangle{
+                        color: "#ffd400"
+                        id: rectangleRemoveDevice
+                        y:155
+                        x:170
+                        width:24
+                        height:24
+                        radius: height/2
+                        Label {
+                            anchors.centerIn: parent
+                            id: removeDevice
+                            horizontalAlignment: "AlignHCenter"
+                            font.family: bebasFont1.name
+                            font.pointSize: 23
+                            color: "black"
+                            text: qsTr("-")
+                        }
+
+                        MouseArea{
+                            anchors.fill: parent
+
+                            hoverEnabled: true
+                            onEntered: { removeDevice.color = "#ffd400"; rectangleRemoveDevice.color="black" }
+                            onExited: { removeDevice.color = "black"; rectangleRemoveDevice.color="#ffd400" }
+
+                            onClicked:{
+                               idInput.cursorVisible = false
+
+
+                                for(var i=0; i< idCombobox.new_model.count;i++){
+                                    var item = idCombobox.new_model.get(i).text
+
+                                    console.log(item,idInput.text.toString())
+                                    if(item == ("id:" + idInput.text.toString())){
+                                        idCombobox.new_model.remove(i,1)
+                                    }
+                                }
+                                idInput.text = ""
+
+                            }
+                        }
+
+                    }
+
+
+
+
+
 
                     Rectangle{
 
@@ -949,10 +1088,11 @@ Window {
                     }
 
                     RectangleLabel{
+                        id: mode_for_mode
                         x: 50
                         anchors.top: parent.top
                         anchors.topMargin: 62
-                        textLabel: "RAINBOW"
+                        textLabel: "GET FROM DEVICE"
                         widthNew: 300
                     }
 
@@ -967,22 +1107,26 @@ Window {
                             id: lightButton1
                             imageSource: "../images/light/1.png"
                             troggle: (backend.lightModeNumber() == 1 && backend.modeNumber("wand")) ? true : false
+                            label_text: "Fire"
                         }
                         SmallButtonLight {
                             id: lightButton2
                             imageSource: "../images/light/2.png"
                             troggle: (backend.lightModeNumber() == 2 && backend.modeNumber("wand")) ? true : false
+                            label_text: "Lava"
                         }
                         SmallButtonLight {
                             id: lightButton3
                             imageSource: "../images/light/3.png"
                             troggle: (backend.lightModeNumber() == 3 && backend.modeNumber("wand")) ? true : false
-                        }
+                            label_text: "Rainbow"
+        }
                         SmallButtonLight {
                             id: lightButton4
                             imageSource: "../images/light/4.png"
                             troggle: (backend.lightModeNumber() == 4 && backend.modeNumber("wand")) ? true : false
-                        }
+                            label_text: "Circular Rainbow"
+        }
                     }
 
                     Row {

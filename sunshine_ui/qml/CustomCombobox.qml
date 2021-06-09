@@ -7,96 +7,112 @@ import QtQuick.Dialogs 1.0
 
 
 Item {
-
+ width: 210
+ height:42
+ id: root
+ property ListModel new_model: [""]
 
 FontLoader {
         id: bebasFont1
         source: "../font/BebasNeue Regular.ttf"
         }
 
-    ComboBox {
-        id: control
-        model: ["dd:03", "id:02", "id:03"]
+ ComboBox {
+  id:equipmentList
+  anchors.verticalCenter: parent.verticalCenter
+  width: 210
+  height:32
+   onActivated: {
 
-        delegate: ItemDelegate {
-            width: control.width
+       backend.getId(root.new_model.get(equipmentList.currentIndex).text)
+        label.text = root.new_model.get(equipmentList.currentIndex).text
+   }
 
-            contentItem: Text {
-                text: modelData
-                color: "#9a4268"
-                font.family: bebasFont1.name
-                font.pointSize: 14
-                elide: Text.ElideRight
-                anchors.centerIn: parent
-            }
-            highlighted: control.highlightedIndex === index
+  model: root.new_model
 
-        }
+  //the background of the combobox
+  background: Rectangle {
+      color: "#c60100"
+      radius: height/2
+  }
 
-        indicator: Canvas {
-            id: canvas
+  delegate: ItemDelegate {
+          id:itemDlgt
+          width: equipmentList.width
+          height:equipmentList.height
+          padding:0
 
-            x: control.width - width - control.rightPadding
-            y: control.topPadding + (control.availableHeight - height) / 2
-            width: 12
-            height: 8
-            contextType: "2d"
+          contentItem: Text {
+                leftPadding: -10
+              id:textItem
+              text: modelData
+              color: hovered?"#ffea00":"white"
+              font.pointSize: 14
+              anchors.centerIn: parent
+              font.family: bebasFont1.name
 
-            Connections {
-                target: control
-                function onPressedChanged() { canvas.requestPaint(); }
-            }
+              verticalAlignment: Text.AlignVCenter
+              horizontalAlignment: Text.AlignHCenter
 
-            onPaint: {
-                context.reset();
-                context.moveTo(0, 0);
-                context.lineTo(width, 0);
-                context.lineTo(width / 2, height);
-                context.closePath();
-                context.fillStyle = control.pressed ? "#743450" : "#9a4268";
-                context.fill();
-            }
-        }
+          }
 
-        contentItem: Text {
-            leftPadding: 0
-            rightPadding: control.indicator.width + control.spacing
+          background: Rectangle {
 
-            text: control.displayText
-            font.family: bebasFont1.name
-            font.pointSize: 14
-            color: control.pressed ? "#743450" : "#9a4268"
-            verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
-        }
+            radius: 20
+            color:itemDlgt.hovered?"#d10000":"#c60100";
+            anchors.left: itemDlgt.left
+            anchors.leftMargin: 0
+            width:itemDlgt.width-2
+          }
 
-        background: Rectangle {
-            implicitWidth: 120
-            implicitHeight: 40
-            border.color: control.pressed ? "#743450" : "#9a4268"
-            border.width: control.visualFocus ? 2 : 1
-            radius: 2
-        }
 
-        popup: Popup {
-            y: control.height - 1
-            width: control.width
-            implicitHeight: contentItem.implicitHeight
-            padding: 1
+   }
 
-            contentItem: ListView {
-                clip: true
-                implicitHeight: contentHeight
-                model: control.popup.visible ? control.delegateModel : null
-                currentIndex: control.highlightedIndex
+   //the arrow on the right in the combobox
+   indicator:Image{
+         width:15; height:15;
+         horizontalAlignment:Image.AlignHCenter
+         y:10
+         x:175
 
-                ScrollIndicator.vertical: ScrollIndicator { }
-            }
+         source:comboPopup.visible ? "../images/icon/arrow_up.png":"../images/icon/arrow_down.png";
+   }
 
-            background: Rectangle {
-                border.color: "#9a4268"
-                radius: 2
-            }
-        }
-    }
+   //the text in the combobox
+   contentItem: Text {
+
+        leftPadding: -10
+         text: equipmentList.displayText
+         font.pointSize: 14
+          anchors.centerIn: parent
+          font.family: bebasFont1.name
+         color: "white"
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+   }
+
+   //the list of elements and their style when the combobox is open
+   popup: Popup {
+         id:comboPopup
+         y: equipmentList.height - 1
+         width: equipmentList.width
+         height:contentItem.implicitHeigh
+         padding: 1
+
+         contentItem: ListView {
+             id:listView
+             implicitHeight: contentHeight
+             model: equipmentList.popup.visible ? equipmentList.delegateModel : null
+
+             ScrollIndicator.vertical: ScrollIndicator { }
+         }
+
+         background: Rectangle {
+            radius: 20
+            color:"#c60100"
+
+         }
+     }
+
+  }
 }

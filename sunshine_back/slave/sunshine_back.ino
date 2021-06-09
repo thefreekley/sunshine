@@ -21,7 +21,7 @@ GButton butt1(A5);
 iarduino_OLED_txt myOLED(0x3C);   
 
 #define LED_COUNT 120          // число светодиодов в кольце/ленте
-#define LED_DT 13             // пин, куда подключен DIN ленты
+#define LED_DT 10             // пин, куда подключен DIN ленты
 
 static byte bright;
 static int counting;  
