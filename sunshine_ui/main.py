@@ -10,7 +10,7 @@ from PIL import ImageColor
 import time
 import sqlite3
 import serial
-from builtins import chr
+
 
 conn = sqlite3.connect("database_sunshine.db")
 cursor = conn.cursor()
@@ -25,6 +25,9 @@ def intbool(integer):
 
 cursor.execute("SELECT * FROM info")
 info_database = cursor.fetchall()
+
+amplituda = 0
+troggle_equalizer = True
 
 string_time_to_sleep = ""
 current_day = 0
@@ -89,10 +92,20 @@ class MainWindow(QObject):
         self.timer_equalizer.timeout.connect(self.equalizerCurves)
         self.timer_equalizer.start(50)
 
+
+
+
+
+
+
+
+
     def equalizerCurves(self):
-        global coef_frequence
+        global coef_frequence,troggle_equalizer,amplituda
         coef_frequence = []
         fft_out = audio_input.get_fft()
+
+
 
         for i in range(len(fft_out)):
             a = int(fft_out[i]/40)
@@ -100,15 +113,28 @@ class MainWindow(QObject):
                 a =200
             coef_frequence.append(a)
 
+        if music_troggle:
+            amplituda= (sum(coef_frequence))/4
+
+            amplituda= int( amplituda * (value_laud/10) ) + 2
+
+            if amplituda>255:
+                amplituda = 255
+
+            ser.write(bytes([amplituda]))
+
+
+
+
+        if troggle_equalizer is False:
+            coef_frequence = [0] * len(coef_frequence)
 
 
     @Slot(bool)
     def troggleEqualizer(self,troggle):
-        global coef_frequence
-        if troggle : self.timer_equalizer.start(50)
-        else:
-            self.timer_equalizer.stop()
-            coef_frequence= [0]*len(coef_frequence)
+        global coef_frequence, troggle_equalizer
+        troggle_equalizer = troggle
+
 
 
     @Slot(int,result=int)
@@ -147,6 +173,8 @@ class MainWindow(QObject):
         else:
             progress_percent = 1
             string_time_to_sleep = "Finish"
+            self.toController(broadcast=tie_device, id=current_id, mode=3, item=[0])
+            time.sleep(0.05)
 
 
 
@@ -193,7 +221,7 @@ class MainWindow(QObject):
         value_light = value
         items = list()
         items.append(value_light)
-        toController(broadcast=tie_device, id=current_id, mode=4, item=items)
+        self.toController(broadcast=tie_device, id=current_id, mode=4, item=items)
         time.sleep(0.05)
 
     @Slot(result=int)
@@ -206,9 +234,6 @@ class MainWindow(QObject):
         global value_laud
         value_laud = value
         items = list()
-        items.append(value_laud)
-        toController(broadcast=tie_device, id=current_id, mode=5, item=items)
-        time.sleep(0.05)
 
     @Slot(result=str)
     def colorOnePallete(self):
@@ -236,7 +261,7 @@ class MainWindow(QObject):
             items.append(ImageColor.getcolor(color_2, "RGB")[1])
             items.append(ImageColor.getcolor(color_2, "RGB")[2])
 
-            toController(broadcast=tie_device,id=current_id,mode=7,item=items)
+            self.toController(broadcast=tie_device,id=current_id,mode=7,item=items)
 
 
     @Slot(result=str)
@@ -256,7 +281,7 @@ class MainWindow(QObject):
     @Slot(result=str)
     def remainTime(self):
         global string_time_to_sleep,delta_time
-         
+
         return string_time_to_sleep
 
     @Slot(result=float)
@@ -303,29 +328,14 @@ class MainWindow(QObject):
         off_troggle = troggleOff
         sleep_troggle = troggleSleep
         paint_troggle = trooglePaint
-        if wand_troggle:
-            toController(broadcast=tie_device, id=current_id, mode=2, item=[music_mode])
-            time.sleep(0.05)
-        if music_troggle:
-            toController(broadcast=tie_device, id=current_id, mode=1, item=[light_mode])
-            time.sleep(0.05)
+
         if off_troggle:
-            toController(broadcast=tie_device, id=current_id, mode=3, item=[1 if off_troggle else 0])
+            self.toController(broadcast=tie_device, id=current_id, mode=3, item=[1 if off_troggle else 0])
             time.sleep(0.05)
-        if sleep_troggle:
-            toController(broadcast=tie_device, id=current_id, mode=3, item=[1 if off_troggle else 0])
-            time.sleep(0.05)
-        if paint_troggle:
-            items = list()
-            items.append(ImageColor.getcolor(color_1, "RGB")[0])
-            items.append(ImageColor.getcolor(color_1, "RGB")[1])
-            items.append(ImageColor.getcolor(color_1, "RGB")[2])
 
-            items.append(ImageColor.getcolor(color_2, "RGB")[0])
-            items.append(ImageColor.getcolor(color_2, "RGB")[1])
-            items.append(ImageColor.getcolor(color_2, "RGB")[2])
 
-            toController(broadcast=tie_device, id=current_id, mode=7, item=items)
+
+
 
 
         self.suport_mod(sleep = troggleSleep)
@@ -349,7 +359,7 @@ class MainWindow(QObject):
             elif musicTroggle6: music_mode = 6
             elif musicTroggle7:music_mode = 7
             elif musicTroggle8: music_mode = 8
-            toController(broadcast=tie_device, id=current_id, mode=1, item=[music_mode])
+            self.toController(broadcast=tie_device, id=current_id, mode=1, item=[music_mode])
             time.sleep(0.05)
 
     @Slot(bool, bool, bool, bool)
@@ -360,22 +370,27 @@ class MainWindow(QObject):
             elif lightTroggle2: light_mode = 2
             elif lightTroggle3: light_mode = 3
             elif lightTroggle4:light_mode = 4
-            toController(broadcast=tie_device, id=current_id, mode=2, item=[light_mode])
+            items = list()
+            items.append(light_mode)
+            self.toController(broadcast=tie_device, id=current_id, mode=2, item=items)
             time.sleep(0.05)
 
+    def toController(self,broadcast, id, mode, item):
+        time.sleep(0.1)
+        self.timer_equalizer.stop()
+        if broadcast is False:
+            ser.write(bytes([0]))
+            ser.write(bytes([id]))
+        else:
+            ser.write(bytes([1]))
 
-def toController(broadcast, id, mode,item):
+        ser.write(bytes([mode]))
 
-    if broadcast is False:
-        ser.write(bytes([0]))
-        ser.write(bytes([id]))
-    else:
-        ser.write(bytes([1]))
+        for i in item:
+            ser.write(bytes([i]))
+        time.sleep(0.1)
+        self.timer_equalizer.start(30)
 
-    ser.write(bytes([mode]))
-
-    for i in item:
-        ser.write(bytes([i]))
 
 
 

@@ -84,3 +84,33 @@ void one_color_symmetric_bottom(int cred, int cgrn, int cblu,int count) {       
   }
   LEDS.show();
 }
+
+void frequency_color ( int combination ){
+   switch(combination){
+      case 1:
+        for ( int i =0; i<LED_COUNT; i++){
+          leds[i].setRGB( 255, 255, 255); 
+        }
+      break;
+      case 2:
+      for ( int i =0; i<LED_COUNT; i++){
+          if ( i< LED_COUNT/2) leds[i].setRGB( 255, 255, 255); 
+          else leds[i].setRGB( 0, 0, 0); 
+        }
+      break;
+      
+      case 3:
+      for ( int i = 0 ; i<LED_COUNT; i++){
+          if (i> LED_COUNT/2) leds[i].setRGB( 255, 255, 255);
+          else leds[i].setRGB( 0, 0, 0); 
+        }
+      break;
+
+      case 4:
+      for ( int i =0; i<LED_COUNT; i++){
+          leds[i].setRGB( 0, 0, 0); 
+        }
+      break;
+  }
+  LEDS.show();
+}

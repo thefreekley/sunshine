@@ -13,7 +13,11 @@ void one_color_allHSV(int ahue) {    //-SET ALL LEDS TO ONE COLOR (HSV)
   }
 }
 
-
+void one_color_all(int cred, int cgrn, int cblu) {       //-SET ALL LEDS TO ONE COLOR
+  for (int i = 0 ; i < LED_COUNT; i++ ) {
+    leds[i].setRGB( cred, cgrn, cblu);
+  }
+}
 
 void rainbow_loop() {                        //-m3-LOOP HSV RAINBOW
   idex++;

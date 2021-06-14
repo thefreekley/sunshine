@@ -37,14 +37,21 @@ void setup(){
 }
 
 void loop(void) { 
-
+  
   if (Serial.available()) {
      byte number = Serial.read();  
-  
+     
     
      if (counter==0){ 
-        broadcast = (number==0) ? false : true;
-        if (number==1)counter++;   
+        if(number>1){
+          sendTo(number);
+          counter = 0;
+        }
+        else{
+          broadcast = (number==0) ? false : true;
+          if (number==1)counter++;
+        }
+        
      }
      else if (counter==1)currentId = number; 
      else if (counter==2) command = number;
