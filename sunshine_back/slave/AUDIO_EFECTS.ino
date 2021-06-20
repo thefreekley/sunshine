@@ -6,6 +6,8 @@ int RAINBOW_PERIOD = 1;
 float RAINBOW_STEP_2 = 0.5;
 
 
+
+
 void one_color_symmetric_top_beta(int count) {       //-SET ALL LEDS TO ONE COLOR
   static byte cobination =0;
   static int old_count = 0;
@@ -31,12 +33,46 @@ void one_color_symmetric_top_beta(int count) {       //-SET ALL LEDS TO ONE COLO
 
 
 void one_color_symmetric_top(int cred, int cgrn, int cblu,int count) {       //-SET ALL LEDS TO ONE COLOR
+  static int last_count;
+  static unsigned  long millis_ocst = 0;
+  static unsigned int gradientIndex=0;
+
+  if(millis()-millis_ocst > 5){
+    
+    if(last_count>count){
+      last_count--;
+    }
+    if(last_count<count){
+      last_count++;
+      gradientIndex = rangeGrandient(gradientIndex, 1); 
+    }
+    else{
+      last_count = count;
+    }
+    
+    
+    millis_ocst = millis();
+  }
+  
   
   for (int i = 0 ; i < LED_COUNT; i++ ) {
-    if(i< LED_COUNT/2 + count && i> LED_COUNT/2 - count) leds[i].setRGB( cred, cgrn, cblu);
+    if(i< LED_COUNT/2 + last_count && i> LED_COUNT/2 - last_count) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
     else leds[i].setRGB(0,0,0);
   }
   LEDS.show();      
+  
+}
+
+int rangeGrandient(int index,int addPart){
+  static int riseTroggle = false;
+  if(riseTroggle){
+    if(index <120)return index+addPart;
+    else{ return 0; riseTroggle=false; }
+  }
+  else{
+    if(index >0)return index-addPart;
+    else{ return 120; riseTroggle=true; }
+  }
 }
 
 

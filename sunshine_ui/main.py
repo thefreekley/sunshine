@@ -10,7 +10,7 @@ from PIL import ImageColor
 import time
 import sqlite3
 import serial
-
+import math
 
 conn = sqlite3.connect("database_sunshine.db")
 cursor = conn.cursor()
@@ -33,6 +33,8 @@ string_time_to_sleep = ""
 current_day = 0
 progress_percent = 0
 tie_device = False
+time_to_send_audio = 20
+in_max = 1000000
 
 print(info_database)
 
@@ -90,7 +92,7 @@ class MainWindow(QObject):
 
         self.timer_equalizer = QTimer()
         self.timer_equalizer.timeout.connect(self.equalizerCurves)
-        self.timer_equalizer.start(50)
+        self.timer_equalizer.start(time_to_send_audio)
 
 
 
@@ -101,7 +103,7 @@ class MainWindow(QObject):
 
 
     def equalizerCurves(self):
-        global coef_frequence,troggle_equalizer,amplituda
+        global coef_frequence,troggle_equalizer,amplituda,in_max, audio_input
         coef_frequence = []
         fft_out = audio_input.get_fft()
 
@@ -114,10 +116,20 @@ class MainWindow(QObject):
             coef_frequence.append(a)
 
         if music_troggle:
-            amplituda= (sum(coef_frequence))/4
+            clear_amplitude = int(audio_input.listen())
+            amplituda =( (clear_amplitude/100)**7)/1000000
 
-            amplituda= int( amplituda * (value_laud/10) ) + 2
 
+
+            if in_max< amplituda:
+                in_max = amplituda
+
+
+
+            amplituda = int((amplituda - 0) * (value_laud - 0) / (in_max - 0) )
+            amplituda = amplituda**10 + 3
+
+            print(in_max)
             if amplituda>255:
                 amplituda = 255
 
@@ -140,9 +152,15 @@ class MainWindow(QObject):
     @Slot(int,result=int)
     def equalizerLine(self,index):
 
-        global coef_frequence
+        global coef_frequence,value_laud
+        new_coef_frequence = list()
+        for i in coef_frequence:
+            new_coef =  i*(value_laud / 60)
+            new_coef_frequence.append( 200 if new_coef>200 else new_coef )
 
-        return coef_frequence[index]
+
+
+        return new_coef_frequence[index]
 
     def doWork(self):
         global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day,delta_time
@@ -173,8 +191,8 @@ class MainWindow(QObject):
         else:
             progress_percent = 1
             string_time_to_sleep = "Finish"
-            self.toController(broadcast=tie_device, id=current_id, mode=3, item=[0])
-            time.sleep(0.05)
+            # self.toController(broadcast=tie_device, id=current_id, mode=3, item=[0])
+            # time.sleep(0.05)
 
 
 
@@ -217,12 +235,12 @@ class MainWindow(QObject):
 
     @Slot(int)
     def getSliderLightValue(self, value):
-        global value_light
+        global value_light,off_troggle
         value_light = value
-        items = list()
-        items.append(value_light)
-        self.toController(broadcast=tie_device, id=current_id, mode=4, item=items)
-        time.sleep(0.05)
+        if not off_troggle:
+
+            self.toController(broadcast=tie_device, id=current_id, mode=4, item=[value_light])
+
 
     @Slot(result=int)
     def loudSliderValue(self):
@@ -233,7 +251,7 @@ class MainWindow(QObject):
     def getSliderLoundValue(self, value):
         global value_laud
         value_laud = value
-        items = list()
+
 
     @Slot(result=str)
     def colorOnePallete(self):
@@ -323,15 +341,24 @@ class MainWindow(QObject):
     @Slot(bool, bool, bool, bool, bool)
     def getModeTroggle(self, troggleWand, troggleMusic, troggleOff, troggleSleep, trooglePaint):
         global wand_troggle,music_troggle,off_troggle,sleep_troggle,paint_troggle,music_mode,light_mode,color_1,color_2
+
+        if off_troggle is not troggleOff:
+            self.toController(broadcast=tie_device, id=current_id, mode=4, item=[0 if troggleOff else value_light])
+            time.sleep(0.05)
+
+        if (trooglePaint is not paint_troggle and wand_troggle) or (wand_troggle is not troggleWand and paint_troggle):
+
+            self.toController(broadcast=tie_device, id=current_id, mode=2, item=[5])
+            time.sleep(0.05)
+
+
         wand_troggle = troggleWand
         music_troggle = troggleMusic
         off_troggle = troggleOff
         sleep_troggle = troggleSleep
         paint_troggle = trooglePaint
 
-        if off_troggle:
-            self.toController(broadcast=tie_device, id=current_id, mode=3, item=[1 if off_troggle else 0])
-            time.sleep(0.05)
+
 
 
 
@@ -359,37 +386,40 @@ class MainWindow(QObject):
             elif musicTroggle6: music_mode = 6
             elif musicTroggle7:music_mode = 7
             elif musicTroggle8: music_mode = 8
+            time.sleep(0.5)
             self.toController(broadcast=tie_device, id=current_id, mode=1, item=[music_mode])
-            time.sleep(0.05)
+            time.sleep(0.5)
 
     @Slot(bool, bool, bool, bool)
     def getLightTroggle(self, lightTroggle1, lightTroggle2, lightTroggle3, lightTroggle4):
         global light_mode
-        if light_mode:
+        if wand_troggle:
             if lightTroggle1: light_mode =1
             elif lightTroggle2: light_mode = 2
             elif lightTroggle3: light_mode = 3
             elif lightTroggle4:light_mode = 4
-            items = list()
-            items.append(light_mode)
-            self.toController(broadcast=tie_device, id=current_id, mode=2, item=items)
-            time.sleep(0.05)
+            if not paint_troggle:
+                self.toController(broadcast=tie_device, id=current_id, mode=2, item=[light_mode])
+
 
     def toController(self,broadcast, id, mode, item):
-        time.sleep(0.1)
         self.timer_equalizer.stop()
+        time.sleep(0.02)
         if broadcast is False:
             ser.write(bytes([0]))
+            time.sleep(0.02)
             ser.write(bytes([id]))
         else:
             ser.write(bytes([1]))
-
+        time.sleep(0.02)
         ser.write(bytes([mode]))
-
+        time.sleep(0.02)
         for i in item:
             ser.write(bytes([i]))
-        time.sleep(0.1)
-        self.timer_equalizer.start(30)
+            time.sleep(0.02)
+
+        time.sleep(0.02)
+        self.timer_equalizer.start(time_to_send_audio)
 
 
 

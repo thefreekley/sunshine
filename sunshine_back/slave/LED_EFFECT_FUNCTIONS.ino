@@ -273,6 +273,7 @@ void fireLine() {
   }
 }
 
+int counter = 0;
 void fireLineNoise() {
   static uint32_t prevTime;
 

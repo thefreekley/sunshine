@@ -1,4 +1,4 @@
-#define ID 14
+#define ID 0
 
 #include <SPI.h>
 #include "nRF24L01.h"
@@ -13,6 +13,8 @@
 
 
 // ---------------СЛУЖЕБНЫЕ ПЕРЕМЕННЫЕ-----------------
+
+          
 int BOTTOM_INDEX = 0;        // светодиод начала отсчёта
 int TOP_INDEX = int(LED_COUNT / 2);
 int EVENODD = LED_COUNT % 2;
@@ -43,7 +45,7 @@ CRGBPalette16 firePalette;
 
 RF24 radio(9,10); // "создать" модуль на пинах 9 и 10 Для Уно
 //RF24 radio(9,53); // для Меги
-byte new_bright;
+byte new_bright = 255;
 byte items[6]= {0,0,0,0,0,0};
 
 byte currentId;
@@ -51,23 +53,33 @@ boolean broadcast;
 
 byte command;
 boolean process;
-byte counter;
+int countTimes;
 
 byte address[][6] = {"1Node","2Node","3Node","4Node","5Node","6Node"};  //возможные номера труб
 
 volatile boolean changeFlag;
 byte musicTheme = 0;
-byte lightTheme = 0;
+byte lightTheme = 5;
 boolean paintTheme = false;
 boolean screenTheme = false;
-byte bright = 0;
-byte gradientColors[6] = {0,0,0,0,0,0};
+byte bright = 255;
+byte gradientColors[12] = {0,255,0,40,128,0,0,60,255,255,0,40};
+
 byte amplitude = 0;
 byte minuteToSleep = 0;
 byte hourToSleep = 0;
 
 
+
+
+
+
+CRGBPalette16 GradientPalette;
+
+
+
 void setup(){
+  GradientPalette.loadDynamicGradientPalette(gradientColors);
    firePalette = CRGBPalette16(
                   getFireColor(0 * 16),
                   getFireColor(1 * 16),
@@ -90,6 +102,7 @@ void setup(){
   LEDS.setBrightness(bright);
   randomSeed(analogRead(0));
   LEDS.addLeds<WS2811, LED_DT, GRB>(leds, LED_COUNT);  // настрйоки для нашей ленты (ленты на WS2811, WS2812, WS2812B)
+  change_mode(lightTheme);
   one_color_all(0, 0, 0);          
   LEDS.show();                     
   randomSeed(analogRead(0));
@@ -113,45 +126,61 @@ void setup(){
   
   radio.powerUp(); //начать работу
   radio.startListening();  //начинаем слушать эфир, мы приёмный модуль
+   
 }
 
 void loop(void) {
-
-    byte pipeNo, gotByte;                          
+  stay_ease();
+   static unsigned long timeLastReceive= 0;
+  byte pipeNo, gotByte;                          
     while( radio.available(&pipeNo)){    // слушаем эфир со всех труб
       radio.read( &gotByte, 1 );         // чиатем входящий сигнал
       byte number = gotByte;
-     if (counter==0){ 
+      timeLastReceive = millis();
+      
+     if (countTimes==0){ 
         if(number>1){
-          amplitude = number;
-          counter = 0;
+          amplitude = map(number, 3, 255, 0, LED_COUNT/2);
+          amplitude = constrain(amplitude, 0, LED_COUNT/2 -1);
+
+          countTimes = 0;
+          process = 0;
+          goto pass_check;
         }
         else{
           broadcast = (number==0) ? false : true;
-          if (number==1)counter++;
+          if (number==1)countTimes++;
         }
         
      }
-     else if (counter==1)currentId = number; 
-     else if (counter==2) command = number;
-     else if (counter==3){
+     else if (countTimes==1)currentId = number; 
+     else if (countTimes==2) command = number;
+     else if (countTimes==3){
         items[0] = number;
         if(command == 1 || command == 2 || command == 3 || command == 4 || command == 5 )process = true;
      }
-     else if (counter==4){
+     else if (countTimes==4){
         items[1] = number;
         if(command == 6)process = true;
      }
      else{
-        items[counter-3] = (byte)number;
-        if (counter==8) process = true;
+        items[countTimes-3] = (byte)number;
+        if (countTimes==8) process = true;
      }
      
      
-     if(!process)counter++;
-     else counter = 0;
+     if(!process)countTimes++;
+     else countTimes = 0;
      
    }
+   pass_check:
+
+   if(millis()-timeLastReceive>150){
+  countTimes = 0;
+  process = 0; 
+}
+
+
 
     if(process){
       
@@ -188,33 +217,44 @@ void loop(void) {
           hourToSleep = items[1];
         break;  
         case 7:
-          gradientColors[0]=items[0];
-          gradientColors[1]=items[1];
-          gradientColors[2]=items[2];
-          gradientColors[3]=items[3];
-          gradientColors[4]=items[4];
-          gradientColors[5]=items[5];
+          
+          gradientColors[1]=items[0];
+          gradientColors[2]=items[1];
+          gradientColors[3]=items[2];
+          gradientColors[5]=items[3];
+          gradientColors[6]=items[4];
+          gradientColors[7]=items[5];
+          gradientColors[9]=items[0];
+          gradientColors[10]=items[1];
+          gradientColors[11]=items[2];
+          
+
+
+         
+          
+          GradientPalette.loadDynamicGradientPalette(gradientColors);
+
+          
         break;      
       }
      
   }
   process = false;
     }
+  
 
 
     if (lightTheme == 1) fireLine();
     else if (lightTheme == 2) fireLineNoise();
     else if (lightTheme == 3) rainbow_loop();
     else if (lightTheme == 4) new_rainbow_loop();
-    else if (lightTheme == 5) {
-      one_color_all(gradientColors[0],gradientColors[1], gradientColors[2]);
-      LEDS.show();
-    }
-
-    if( musicTheme = 1) one_color_symmetric_top(gradientColors[0],gradientColors[1], gradientColors[2],amplitude);
-    if( musicTheme = 2) one_color_symmetric_bottom(gradientColors[0],gradientColors[1], gradientColors[2],amplitude);
-    if( musicTheme = 3) one_color_symmetric_top_beta(amplitude);
+    else if (lightTheme == 5) gradientShow();
     
+
+    if( musicTheme == 1) one_color_symmetric_top(gradientColors[0],gradientColors[1], gradientColors[2],amplitude);
+    else if( musicTheme == 2) one_color_symmetric_bottom(gradientColors[0],gradientColors[1], gradientColors[2],amplitude);
+    else if( musicTheme == 3) one_color_symmetric_top_beta(amplitude);
+ 
     
    
 }

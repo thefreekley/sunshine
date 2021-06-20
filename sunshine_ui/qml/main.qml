@@ -1051,7 +1051,7 @@ Window {
                         implicitWidth: 300
                         implicitHeight: 26
                         from:0
-                        to:100
+                        to:250
 
                         value: backend.lightSliderValue()
 
@@ -1098,7 +1098,7 @@ Window {
                         implicitHeight: 26
 
                         from:0
-                        to:100
+                        to:255
 
                         value: backend.loudSliderValue()
 
