@@ -40,6 +40,7 @@ float tcount = 0.0;          //-INC VAR FOR SIN LOOPS
 int lcount = 0;              //-ANOTHER COUNTING VAR
 CRGBPalette16 firePalette;
 
+
 ////////////////////////////////////////////////////////////////////
 
 
@@ -66,11 +67,19 @@ byte bright = 255;
 byte gradientColors[12] = {0,255,0,40,128,0,0,60,255,255,0,40};
 
 byte amplitude = 0;
+
 byte minuteToSleep = 0;
 byte hourToSleep = 0;
 
 
 
+//struct color {
+//  int r;
+//  int g;
+//  int b;
+//};
+//
+//typedef struct color Color;
 
 
 
@@ -102,7 +111,7 @@ void setup(){
   LEDS.setBrightness(bright);
   randomSeed(analogRead(0));
   LEDS.addLeds<WS2811, LED_DT, GRB>(leds, LED_COUNT);  // настрйоки для нашей ленты (ленты на WS2811, WS2812, WS2812B)
-  change_mode(lightTheme);
+  
   one_color_all(0, 0, 0);          
   LEDS.show();                     
   randomSeed(analogRead(0));
@@ -126,6 +135,7 @@ void setup(){
   
   radio.powerUp(); //начать работу
   radio.startListening();  //начинаем слушать эфир, мы приёмный модуль
+  change_mode(lightTheme);
    
 }
 
@@ -140,9 +150,9 @@ void loop(void) {
       
      if (countTimes==0){ 
         if(number>1){
-          amplitude = map(number, 3, 255, 0, LED_COUNT/2);
-          amplitude = constrain(amplitude, 0, LED_COUNT/2 -1);
-
+          
+          amplitude = number;
+         
           countTimes = 0;
           process = 0;
           goto pass_check;
@@ -192,13 +202,16 @@ void loop(void) {
         lightTheme = 0;
         screenTheme = false;
         paintTheme = false;
+        one_color_all(0, 0, 0);
         break;
 
         case 2:
         lightTheme = items[0];
+        change_mode(lightTheme);
         musicTheme = 0;
         screenTheme = false;
         paintTheme = false;
+        
         break;
         
         case 4:
@@ -233,7 +246,7 @@ void loop(void) {
          
           
           GradientPalette.loadDynamicGradientPalette(gradientColors);
-
+          if(lightTheme == 5) fill_palette(leds,LED_COUNT,0, 255/LED_COUNT,GradientPalette,255,LINEARBLEND); LEDS.show();
           
         break;      
       }
@@ -251,25 +264,30 @@ void loop(void) {
     else if (lightTheme == 5) gradientShow();
     
 
-    if( musicTheme == 1) one_color_symmetric_top(gradientColors[0],gradientColors[1], gradientColors[2],amplitude);
-    else if( musicTheme == 2) one_color_symmetric_bottom(gradientColors[0],gradientColors[1], gradientColors[2],amplitude);
-    else if( musicTheme == 3) one_color_symmetric_top_beta(amplitude);
- 
+    if( musicTheme == 1) gradientMusicMode(amplitude,1);
+    else if( musicTheme == 2) gradientMusicMode(amplitude,2);
+    else if( musicTheme == 3) gradientMusicMode(amplitude,3);
+    else if( musicTheme == 4) gradientMusicMode(amplitude,4);
+    else if( musicTheme == 5)three_color_symmetric_top_beta(amplitude); 
+    else if( musicTheme == 6)frequencySplit(amplitude); 
+    else if( musicTheme == 7) slideGrlitters(amplitude);
     
    
 }
 
 void change_mode(int newmode) {
   thissat = 255;
+  one_color_all(0, 0, 0);
+  Serial.println(newmode);
   switch (newmode) {
    case 4: thisdelay = 15; break;                      //---NEW RAINBOW LOOP
     //case 2: thishue = 160; thissat = 50; break;         //--- FLICKER
     case 3: thisdelay = 20; thisstep = 10; break;       //---RAINBOW LOOP
 
-    case 5: one_color_all(gradientColors[0],gradientColors[1], gradientColors[2]); LEDS.show(); break; //---ALL RED
+    case 5: fill_palette(leds,LED_COUNT,0, 255/LED_COUNT,GradientPalette,255,LINEARBLEND); LEDS.show(); break; //---ALL RED
     }
   bouncedirection = 0;
-  one_color_all(0, 0, 0);
+
    changeFlag = true;
 }
 

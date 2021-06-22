@@ -80,7 +80,7 @@ else:
 
 
 audio_input = AmplitudeLevel()
-coef_frequence = []
+coef_frequence = [0]*7
 
 class MainWindow(QObject):
     def __init__(self):
@@ -104,36 +104,39 @@ class MainWindow(QObject):
 
     def equalizerCurves(self):
         global coef_frequence,troggle_equalizer,amplituda,in_max, audio_input
+        old_coef_frequence = coef_frequence
         coef_frequence = []
         fft_out = audio_input.get_fft()
 
 
 
         for i in range(len(fft_out)):
-            a = int(fft_out[i]/40)
+            a = int(fft_out[i]/ (270-value_laud))
             if a>200:
                 a =200
             coef_frequence.append(a)
 
         if music_troggle:
-            clear_amplitude = int(audio_input.listen())
-            amplituda =( (clear_amplitude/100)**7)/1000000
+            if music_mode == 6:
+                byte_value = 0
+                for i in range(len(coef_frequence)-1):
+                    if coef_frequence[i]/ (old_coef_frequence[i] + 0.0001)>6:
+                        byte_value = byte_value + 2**i
+
+                ser.write(bytes([int(byte_value+3)]))
+            else:
+
+                amplituda = (sum(coef_frequence)) / 4
+
+                amplituda = amplituda**1.5
+
+                amplituda = (amplituda - 0) * (value_laud*4 ) / (2000 - 0) + 3
 
 
+                if amplituda > 255:
+                    amplituda = 255
 
-            if in_max< amplituda:
-                in_max = amplituda
-
-
-
-            amplituda = int((amplituda - 0) * (value_laud - 0) / (in_max - 0) )
-            amplituda = amplituda**10 + 3
-
-            print(in_max)
-            if amplituda>255:
-                amplituda = 255
-
-            ser.write(bytes([amplituda]))
+                ser.write(bytes([ int(amplituda) ]))
 
 
 

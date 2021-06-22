@@ -90,7 +90,9 @@ Item{
                 if(root.imageSource == "../images/music/1.png" ||
                         root.imageSource == "../images/music/2.png" ||
                         root.imageSource == "../images/music/3.png" ||
-                        root.imageSource == "../images/music/4.png"
+                        root.imageSource == "../images/music/4.png" ||
+                        root.imageSource == "../images/music/6.png" ||
+                        root.imageSource == "../images/music/7.png"
                         ){
                     painLight.troggle = true
                 }
