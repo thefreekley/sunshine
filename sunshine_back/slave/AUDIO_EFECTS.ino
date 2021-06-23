@@ -66,42 +66,102 @@ void three_color_symmetric_top_beta(int count) {       //-SET ALL LEDS TO ONE CO
 }
 
 
-void gradientMusicMode(int count , int modeOfMusic) {       //-SET ALL LEDS TO ONE COLOR // 1 up line 2 down line 3 from center 4 to center 
+int glitterPosition[10]= {LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1};
+
+void gradientMusicMode(int count , byte modeOfMusic) {       //-SET ALL LEDS TO ONE COLOR // 1 up line 2 down line 3 from center 4 to center 
   static int last_count;
+  static int last_delta_count;
+  static int new_count = 0;
   static unsigned  long millis_ocst = 0;
   static unsigned int gradientIndex=0;
-  count = map(count, 3, 255, 0, LED_COUNT);
-  count = constrain(amplitude, 0, LED_COUNT-1) -3;
 
-  if(millis()-millis_ocst > 2){
+  static byte num_of_glitter = 0;
+  
+  count = map(count, 3, 255, 0, LED_COUNT);
+  if(count>1)count = count - count%2; 
+
+   gradientIndex = rangeGrandient(gradientIndex, 1);
+ 
+  if(last_count!=count){
+    last_delta_count = last_count;
+    new_count = last_delta_count;
     
-    if(last_count>count){
-      last_count--;
-    }
-    if(last_count<count){
-      last_count++;
-      gradientIndex = rangeGrandient(gradientIndex, 1); 
-    }
-    else{
-      last_count = count;
-    }
-    
-    
-    millis_ocst = millis();
   }
   
   
   
-  for (int i = 0 ; i < LED_COUNT; i++ ) {
-    if( (i< LED_COUNT/2 + last_count/2 && i> LED_COUNT/2 - last_count/2) && modeOfMusic==3) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
-    else if ( (i< last_count/2 || i> LED_COUNT - last_count/2) && modeOfMusic==4) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
-    else if (i < last_count && modeOfMusic==1) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
-    else if (i > LED_COUNT - last_count && modeOfMusic==2) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
+      if(last_count==count) {
+      if(last_delta_count > count){
+        if(new_count>count){
+          if(new_count<2)new_count = 0;
+          else new_count-=2; 
+        }
+      }
+      else if(last_delta_count < count){
+         if(new_count<count){
+          if(new_count>254)new_count = 255; //animation arrow 
+          else new_count+=2;
+            
+         }
+      }
+      if(new_count == count && count!=0 ){
+         if(last_delta_count < count)new_count = random(last_delta_count/2,count);
+         else if(last_delta_count > count)new_count = random(count/2 ,last_delta_count); // when count not enough change
+      }
+      
+      }
+
+   if(count>last_count){
+    glitterPosition[num_of_glitter] = new_count;
+    num_of_glitter++;
+    num_of_glitter%=10; 
+  }
+      
+  for(int i=0;i<10;i++){
+    if (glitterPosition[i]<LED_COUNT)glitterPosition[i]= glitterPosition[i]+1;
+  }
+
+  
+    
+   
+   if(modeOfMusic==1){
+      for (int i = 0 ; i < LED_COUNT; i++ ) {
+      if (i > LED_COUNT - new_count && modeOfMusic==2) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
+      else leds[i].setRGB(0,0,0);
+      }
+    }
+   else if(modeOfMusic==2){
+    for (int i = 0 ; i < LED_COUNT; i++ ) {
+    if (i < new_count) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
     else leds[i].setRGB(0,0,0);
-    
-    
+    }
   }
-  LEDS.show();      
+  else if(modeOfMusic==3){
+    for (int i = 0 ; i < LED_COUNT; i++ ) {
+    if(i< LED_COUNT/2 + new_count/2 && i> LED_COUNT/2 - new_count/2) leds[i] = ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i% (LED_COUNT/2))*2 );
+    else leds[i].setRGB(0,0,0);
+    }
+    for(int i=0;i<10;i++){
+      leds[LED_COUNT/2 + glitterPosition[i]/2-1] = ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,1)*2 );
+      leds[LED_COUNT/2 + glitterPosition[i]/2 -2].setRGB(0,0,0);
+
+      leds[LED_COUNT/2 - glitterPosition[i]/2] = ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,1)*2 );
+      leds[LED_COUNT/2 - glitterPosition[i]/2 +1].setRGB(0,0,0);
+
+    }
+    leds[LED_COUNT-1].setRGB(0,0,0);
+    leds[0].setRGB(0,0,0);
+  }
+  else if(modeOfMusic==4){
+    for (int i = 0 ; i < LED_COUNT; i++ ) {
+    if (i< new_count/2 || i> LED_COUNT - new_count/2) leds[i]= ColorFromPalette( GradientPalette, rangeGrandient(gradientIndex,i)*2 );
+    else leds[i].setRGB(0,0,0);
+  }
+  }
+  
+    
+   LEDS.show();
+   last_count = count;     
   
 }
 
@@ -120,60 +180,7 @@ int rangeGrandient(int index,int addPart){
 
 
 
-void flicker_color(int level){
 
-  static byte cobination =0 ;
-  if(level<10){
-  if(cobination >4)cobination=0;
-  else cobination++;
-  
-  }
-   
-  int a = map(level*10,0,600,0,255);
-    switch(cobination){
-    case 0:one_color_all(a,0,a); break;
-    case 1:one_color_all(a,0,0); break;
-    case 2:one_color_all(0,0,a); break;
-    case 3:one_color_all(a,a,a); break;
-    case 4:one_color_all(0,a,a); break;
-  }
-  
-  
-  LEDS.show(); 
-  
-}
-
-
-
-void frequency_color ( int combination ){
-   switch(combination){
-      case 1:
-        for ( int i =0; i<LED_COUNT; i++){
-          leds[i].setRGB( 255, 255, 255); 
-        }
-      break;
-      case 2:
-      for ( int i =0; i<LED_COUNT; i++){
-          if ( i< LED_COUNT/2) leds[i].setRGB( 255, 255, 255); 
-          else leds[i].setRGB( 0, 0, 0); 
-        }
-      break;
-      
-      case 3:
-      for ( int i = 0 ; i<LED_COUNT; i++){
-          if (i> LED_COUNT/2) leds[i].setRGB( 255, 255, 255);
-          else leds[i].setRGB( 0, 0, 0); 
-        }
-      break;
-
-      case 4:
-      for ( int i =0; i<LED_COUNT; i++){
-          leds[i].setRGB( 0, 0, 0); 
-        }
-      break;
-  }
-  LEDS.show();
-}
 
 byte stateSplitPart[7][3] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
 
@@ -241,11 +248,11 @@ void slideGrlitters(int count){
    static int indexGradientColor = 0;
   
  
-  if(millis() - longTimeForUpdateState > 10) {
-    if( (count*100)/lastValue >150){
+  if(millis() - longTimeForUpdateState > 2) {
+    if(count>lastValue){
       indexGradientColor+=20;
       indexGradientColor%=240;
-      
+//      Serial.println((count*count*100)/lastValue*lastValue);
       leds[LED_COUNT/2-1] = ColorFromPalette( GradientPalette, indexGradientColor );
       leds[LED_COUNT/2+1] = ColorFromPalette( GradientPalette, indexGradientColor );
     }
@@ -258,14 +265,25 @@ void slideGrlitters(int count){
   if(millis() - shortTimeForUpdateState > 5) {
      
      for(int i = LED_COUNT-1; i>LED_COUNT/2; i--){
-      leds[i]=leds[i-1];    
+      leds[i]=leds[i-1];
+          
     }
     
      for(int i = 0; i<LED_COUNT/2+1; i++){
       leds[i]=leds[i+1];    
     }
+
+
+    
      LEDS.show();
     shortTimeForUpdateState = millis();
   }
   
+}
+
+void audioFlicker(int count){
+   for(int i = 0; i<LED_COUNT; i++){
+      leds[i].setRGB(count,count,count);
+}
+LEDS.show();
 }

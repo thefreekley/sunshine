@@ -270,15 +270,14 @@ void loop(void) {
     else if( musicTheme == 4) gradientMusicMode(amplitude,4);
     else if( musicTheme == 5)three_color_symmetric_top_beta(amplitude); 
     else if( musicTheme == 6)frequencySplit(amplitude); 
-    else if( musicTheme == 7) slideGrlitters(amplitude);
-    
+    else if( musicTheme == 7) slideGrlitters(amplitude); 
+//    else if( musicTheme == 8) flicker_color(amplitude); 
    
 }
 
 void change_mode(int newmode) {
   thissat = 255;
   one_color_all(0, 0, 0);
-  Serial.println(newmode);
   switch (newmode) {
    case 4: thisdelay = 15; break;                      //---NEW RAINBOW LOOP
     //case 2: thishue = 160; thissat = 50; break;         //--- FLICKER
@@ -293,10 +292,11 @@ void change_mode(int newmode) {
 
 
 void stay_ease(){
+  if(new_bright!=bright){
   static unsigned long time_ease_bright;
   if(millis()-time_ease_bright>2){
   //Serial.println(String(bright) + "-n  " + String(new_bright));
-  if(new_bright!=bright){
+  
   if(new_bright<bright)bright-=5;
   else bright+=5;
   }

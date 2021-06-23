@@ -23,6 +23,10 @@ def boolint(boolean):
 def intbool(integer):
     return True if integer==1 else False
 
+def mapping(num,max_cur,max_new): #start - 0
+    coef = max_new/max_cur
+    return int(coef*num)
+
 cursor.execute("SELECT * FROM info")
 info_database = cursor.fetchall()
 
@@ -126,17 +130,16 @@ class MainWindow(QObject):
                 ser.write(bytes([int(byte_value+3)]))
             else:
 
-                amplituda = (sum(coef_frequence)) / 4
+                a = int(audio_input.listen())
 
-                amplituda = amplituda**1.5
+                amplitude_filter = mapping(a, 6001, value_laud/2)
 
-                amplituda = (amplituda - 0) * (value_laud*4 ) / (2000 - 0) + 3
+                amplitude_filter = amplitude_filter **2 + 3
 
+                if amplitude_filter > 255:
+                    amplitude_filter = 255
 
-                if amplituda > 255:
-                    amplituda = 255
-
-                ser.write(bytes([ int(amplituda) ]))
+                ser.write(bytes([amplitude_filter]))
 
 
 

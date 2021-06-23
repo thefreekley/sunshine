@@ -12,7 +12,7 @@ Window {
     visible: true
     color: "#00000000"
     title: qsTr("Hello World")
-    flags: Qt.FramelessWindowHint
+
     property int previousX
     property int previousY
 
