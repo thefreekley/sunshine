@@ -1,4 +1,3 @@
-
 int glitterPosition[10]= {LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1,LED_COUNT-1};
 
 void gradientMusicMode(int count,byte modeOfMusic){

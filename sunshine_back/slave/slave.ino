@@ -59,7 +59,7 @@ int countTimes;
 byte address[][6] = {"1Node","2Node","3Node","4Node","5Node","6Node"};  //возможные номера труб
 
 volatile boolean changeFlag;
-byte musicTheme = 3;
+byte musicTheme = 8;
 byte lightTheme = 0;
 boolean paintTheme = false;
 boolean screenTheme = false;
@@ -271,7 +271,7 @@ void loop(void) {
     else if( musicTheme == 5)three_color_symmetric_top_beta(amplitude); 
     else if( musicTheme == 6)frequencySplit(amplitude); 
     else if( musicTheme == 7) slideGrlitters(amplitude); 
-//    else if( musicTheme == 8) gradientMusic2(amplitude); 
+    else if( musicTheme == 8) audioFlicker(amplitude); 
    
 }
 

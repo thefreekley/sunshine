@@ -126,49 +126,93 @@ void frequencySplit(byte count){
     
 }
 
+struct Glitter{
+  byte position;
+  byte speed;
+  byte color;
+  byte delay;
+};
+
+Glitter glitterArr[30];
+
+
 void slideGrlitters(int count){
-   static unsigned long longTimeForUpdateState = 0;
-   static unsigned long shortTimeForUpdateState = 0;
-   static int lastValue = 3;
-   static int indexGradientColor = 0;
-  
- 
-  if(millis() - longTimeForUpdateState > 2) {
-    if(count>lastValue){
-      indexGradientColor+=20;
-      indexGradientColor%=240;
-//      Serial.println((count*count*100)/lastValue*lastValue);
-      leds[LED_COUNT/2-1] = ColorFromPalette( GradientPalette, indexGradientColor );
-      leds[LED_COUNT/2+1] = ColorFromPalette( GradientPalette, indexGradientColor );
-    }
-//    Serial.println(String(count) + " " + String(lastValue) + " " + String((count*100)/lastValue) );
-    longTimeForUpdateState = millis();
+   static byte index_glitter = 0;
+   static byte index_gradient = 0;
+   static int last_value = 0;
+   static unsigned long time_alarm = 0;
+   count = map(count, 2, 255, 0, LED_COUNT);
     
-    lastValue = count;
-  }
+   index_glitter++;
+   index_glitter%=30;
 
-  if(millis() - shortTimeForUpdateState > 5) {
+   index_gradient++;
+   index_gradient%=60;
+    
+   if(count>last_value){
+      glitterArr[index_glitter].speed = map(count - last_value,1,LED_COUNT,1,5);
+      glitterArr[index_glitter].color = ((count - last_value)*10)%240;
+      glitterArr[index_glitter].position = 0;
+   }
+
+  
+   for(int i=0;i<30;i++){
      
-     for(int i = LED_COUNT-1; i>LED_COUNT/2; i--){
-      leds[i]=leds[i-1];
-          
-    }
-    
-     for(int i = 0; i<LED_COUNT/2+1; i++){
-      leds[i]=leds[i+1];    
-    }
+      glitterArr[i].delay+=glitterArr[i].speed;
+      if(glitterArr[i].delay>5)glitterArr[i].delay = 0;
+      
+     
+      if(glitterArr[i].delay == 0){
+        
+      leds[LED_COUNT/2 + glitterArr[i].position-1].setRGB(0,0,0);
 
+      if(glitterArr[i].position<LED_COUNT/2) glitterArr[i].position+= ((LED_COUNT/2)*(LED_COUNT/2) - glitterArr[i].position*glitterArr[i].position)/4000 + 1;
+      
+      if (glitterArr[i].position>LED_COUNT/2)glitterArr[i].position = 0;
+      
+      leds[LED_COUNT/2 + glitterArr[i].position-1]= ColorFromPalette( GradientPalette, glitterArr[i].color*4, 255*(LED_COUNT/2)/glitterArr[i].position );
+      }  
+   }
+   leds[LED_COUNT-1].setRGB(0,0,0);
 
-    
-     LEDS.show();
-    shortTimeForUpdateState = millis();
-  }
-  
+   for(int i =0;i<LED_COUNT/2;i++){
+    leds[i] = leds[LED_COUNT - i -1]; 
+   }
+   
+   
+   LEDS.show();
+   
+   last_value = count;
 }
 
 void audioFlicker(int count){
-   for(int i = 0; i<LED_COUNT; i++){
-      leds[i].setRGB(count,count,count);
-}
-LEDS.show();
+  static int last_count = 0;
+  byte mode_part;
+  
+  if(last_count<count){
+    mode_part = random(0,2);
+    if(mode_part == 0){
+        for(int i = 0 ; i < LED_COUNT; i++){
+           if(i> LED_COUNT/3 && i < LED_COUNT - LED_COUNT/3) leds[i].setRGB(255,255,255);
+           else leds[i].setRGB(0,0,0);
+        }
+    }
+
+    else if(mode_part == 1){
+        for(int i = 0 ; i < LED_COUNT; i++){
+           if(i< LED_COUNT/3 || i > LED_COUNT/2) leds[i].setRGB(255,255,255);
+           else leds[i].setRGB(0,0,0);
+        }
+    }
+    
+    
+  }
+
+   for(int i = 0 ; i < LED_COUNT; i++){
+           if(leds[i][0]!=0)leds[i][0]--;
+           if(leds[i][1]!=0)leds[i][1]--;
+           if(leds[i][2]!=0)leds[i][2]--;
+        }
+    LEDS.show();
+  last_count = count;
 }
