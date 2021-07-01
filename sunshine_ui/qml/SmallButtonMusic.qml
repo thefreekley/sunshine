@@ -92,7 +92,8 @@ Item{
                         root.imageSource == "../images/music/3.png" ||
                         root.imageSource == "../images/music/4.png" ||
                         root.imageSource == "../images/music/6.png" ||
-                        root.imageSource == "../images/music/7.png"
+                        root.imageSource == "../images/music/7.png" ||
+                        root.imageSource == "../images/music/8.png"
                         ){
                     painLight.troggle = true
                 }

@@ -5,71 +5,9 @@ byte COLOR_SPEED = 100;
 int RAINBOW_PERIOD = 1;
 float RAINBOW_STEP_2 = 0.5;
 
-DEFINE_GRADIENT_PALETTE( SmoothColor1 ) {
-  0,     255,  255,  255,   
-128,   255,  0,  255,  
-255,   255,  255,  255  }; 
-
-
-DEFINE_GRADIENT_PALETTE( SmoothColor2 ) {
-  0,     255,  255,  255, 
-128,   255,  0,  0,  
-255,   255,  255,  255 }; 
-
-DEFINE_GRADIENT_PALETTE( SmoothColor3 ) {
-  0,    255,  255,  255,    
-128,   0,  0,  255,  
-255,   255,  255,  255   }; 
-
-DEFINE_GRADIENT_PALETTE( SmoothColor4 ) {
-  0,     255,  0,  0,    
-128,   255,  255,  255,  
-255,    255,  0,  0,   }; 
-
-DEFINE_GRADIENT_PALETTE( SmoothColor5 ) {
-  0,     255,  255,  255,   
-128,   0,  255,  255,  
-255,   255,  255,  255  }; 
-
-CRGBPalette16 MyPaletteSmooth1 = SmoothColor1;
-CRGBPalette16 MyPaletteSmooth2 = SmoothColor2;
-CRGBPalette16 MyPaletteSmooth3 = SmoothColor3;
-CRGBPalette16 MyPaletteSmooth4 = SmoothColor4;
-CRGBPalette16 MyPaletteSmooth5 = SmoothColor5;
-
-
-void three_color_symmetric_top_beta(int count) {       //-SET ALL LEDS TO ONE COLOR
-
-   count = map(count, 3, 255, 0, LED_COUNT);
-   count = constrain(amplitude, 0, LED_COUNT-1) -3;
-  
-  static byte cobination =0;
-  static int old_count = 0;
-   if(count - old_count > 10){
-  if(cobination >3)cobination=0;
-  else cobination++;
-  }
-  old_count = count;
-  for (int i = 0 ; i < LED_COUNT; i++ ) {
-    if(i< LED_COUNT/2 + count && i> LED_COUNT/2 - count){
-         switch(cobination){
-    case 0:leds[i] = ColorFromPalette( MyPaletteSmooth1, i*2 ); break;
-    case 1:leds[i] = ColorFromPalette( MyPaletteSmooth2, i*2 ); break;
-    case 2: leds[i] = ColorFromPalette( MyPaletteSmooth3, i*2 ); break;
-    case 3:leds[i] = ColorFromPalette( MyPaletteSmooth4, i*2 ); break;
-    case 4:leds[i] = ColorFromPalette( MyPaletteSmooth5, i*2 ); break;
-  }
-    }
-    else leds[i].setRGB(0,0,0);
-  }
-  LEDS.show();      
-}
-
 
 
 byte stateSplitPart[7][3] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}};
-
-
 byte speedOfFrequancy = 3;
 void frequencySplit(byte count){
     
@@ -135,6 +73,15 @@ struct Glitter{
 
 Glitter glitterArr[30];
 
+void clearGlitterArr(){
+  for(int i =0; i<30;i++){
+     glitterArr[i].position=0;
+     glitterArr[i].speed=0;
+     glitterArr[i].color=0;
+     glitterArr[i].delay=0;
+  }
+}
+
 
 void slideGrlitters(int count){
    static byte index_glitter = 0;
@@ -143,8 +90,7 @@ void slideGrlitters(int count){
    static unsigned long time_alarm = 0;
    count = map(count, 2, 255, 0, LED_COUNT);
     
-   index_glitter++;
-   index_glitter%=30;
+   
 
    index_gradient++;
    index_gradient%=60;
@@ -153,6 +99,8 @@ void slideGrlitters(int count){
       glitterArr[index_glitter].speed = map(count - last_value,1,LED_COUNT,1,5);
       glitterArr[index_glitter].color = ((count - last_value)*10)%240;
       glitterArr[index_glitter].position = 0;
+      index_glitter++;
+      index_glitter%=30;
    }
 
   
@@ -183,36 +131,4 @@ void slideGrlitters(int count){
    LEDS.show();
    
    last_value = count;
-}
-
-void audioFlicker(int count){
-  static int last_count = 0;
-  byte mode_part;
-  
-  if(last_count<count){
-    mode_part = random(0,2);
-    if(mode_part == 0){
-        for(int i = 0 ; i < LED_COUNT; i++){
-           if(i> LED_COUNT/3 && i < LED_COUNT - LED_COUNT/3) leds[i].setRGB(255,255,255);
-           else leds[i].setRGB(0,0,0);
-        }
-    }
-
-    else if(mode_part == 1){
-        for(int i = 0 ; i < LED_COUNT; i++){
-           if(i< LED_COUNT/3 || i > LED_COUNT/2) leds[i].setRGB(255,255,255);
-           else leds[i].setRGB(0,0,0);
-        }
-    }
-    
-    
-  }
-
-   for(int i = 0 ; i < LED_COUNT; i++){
-           if(leds[i][0]!=0)leds[i][0]--;
-           if(leds[i][1]!=0)leds[i][1]--;
-           if(leds[i][2]!=0)leds[i][2]--;
-        }
-    LEDS.show();
-  last_count = count;
 }
