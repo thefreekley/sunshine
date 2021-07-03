@@ -11,6 +11,7 @@ import time
 import sqlite3
 import serial
 import math
+import win32gui
 
 conn = sqlite3.connect("database_sunshine.db")
 cursor = conn.cursor()
@@ -27,6 +28,16 @@ def mapping(num,max_cur,max_new): #start - 0
     coef = max_new/max_cur
     return int(coef*num)
 
+
+import win32gui
+
+
+def pixel_color_at(x, y):
+    hdc = win32gui.GetWindowDC(win32gui.GetDesktopWindow())
+    c = int(win32gui.GetPixel(hdc, x, y))
+    # (r, g, b)
+    return (c & 0xff), ((c >> 8) & 0xff), ((c >> 16) & 0xff)
+
 cursor.execute("SELECT * FROM info")
 info_database = cursor.fetchall()
 
@@ -39,6 +50,8 @@ progress_percent = 0
 tie_device = False
 time_to_send_audio = 20
 in_max = 1000000
+
+
 
 print(info_database)
 
@@ -64,14 +77,14 @@ if len(info_database) == 0:
     wand_troggle = True
     music_troggle = False
     off_troggle = False
-    sleep_troggle = False
+    screen_troggle = False
     paint_troggle = False
 else:
     current_id = info_database[0][0]
     wand_troggle = intbool(info_database[0][1])
     music_troggle = intbool(info_database[0][2])
     off_troggle = intbool(info_database[0][3])
-    sleep_troggle = intbool(info_database[0][4])
+    screen_troggle = intbool(info_database[0][4])
     paint_troggle = intbool(info_database[0][5])
     sleep_from =[info_database[0][6],info_database[0][7]]
     sleep_to =[info_database[0][8],info_database[0][9]]
@@ -89,10 +102,10 @@ coef_frequence = [0]*7
 class MainWindow(QObject):
     def __init__(self):
         QObject.__init__(self)
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.doWork)
-        if sleep_troggle:
-            self.timer.start(1000)
+        self.screen_timer = QTimer()
+        self.screen_timer.timeout.connect(self.screenInfo)
+        if screen_troggle:
+            self.screen_timer.start(1000)
 
         self.timer_equalizer = QTimer()
         self.timer_equalizer.timeout.connect(self.equalizerCurves)
@@ -103,6 +116,10 @@ class MainWindow(QObject):
 
 
 
+
+    def screenInfo(self):
+        screenColors = pixel_color_at(*win32gui.GetCursorPos())
+        self.toController(broadcast=tie_device, id=current_id, mode=5, item=screenColors)
 
 
 
@@ -124,7 +141,7 @@ class MainWindow(QObject):
             if music_mode == 6:
                 byte_value = 0
                 for i in range(len(coef_frequence)-1):
-                    if coef_frequence[i]/ (old_coef_frequence[i] + 0.0001)>6:
+                    if coef_frequence[i]/ (old_coef_frequence[i] + 0.0001)>10:
                         byte_value = byte_value + 2**i
 
                 ser.write(bytes([int(byte_value+3)]))
@@ -224,7 +241,7 @@ class MainWindow(QObject):
         if item== "wand": return wand_troggle
         elif item == "music": return music_troggle
         elif item == "off":return off_troggle
-        elif item == "sleep":return sleep_troggle
+        elif item == "screen":return screen_troggle
         elif item == "paint": return paint_troggle
 
 
@@ -345,8 +362,8 @@ class MainWindow(QObject):
 
 
     @Slot(bool, bool, bool, bool, bool)
-    def getModeTroggle(self, troggleWand, troggleMusic, troggleOff, troggleSleep, trooglePaint):
-        global wand_troggle,music_troggle,off_troggle,sleep_troggle,paint_troggle,music_mode,light_mode,color_1,color_2
+    def getModeTroggle(self, troggleWand, troggleMusic, troggleOff, troggleScreen, trooglePaint):
+        global wand_troggle,music_troggle,off_troggle,screen_troggle,paint_troggle,music_mode,light_mode,color_1,color_2
 
         if off_troggle is not troggleOff:
             self.toController(broadcast=tie_device, id=current_id, mode=4, item=[0 if troggleOff else value_light])
@@ -361,23 +378,18 @@ class MainWindow(QObject):
         wand_troggle = troggleWand
         music_troggle = troggleMusic
         off_troggle = troggleOff
-        sleep_troggle = troggleSleep
+        screen_troggle = troggleScreen
         paint_troggle = trooglePaint
 
+        print(screen_troggle)
 
-
-
-
-
-
-
-        self.suport_mod(sleep = troggleSleep)
-
-    def suport_mod(self, sleep=False):
-        if sleep:
-            self.timer.start(1000)
+        if screen_troggle:
+            self.screen_timer.start(1000)
         else:
-            self.timer.stop()
+            self.screen_timer.stop()
+
+
+
 
     @Slot(bool, bool, bool, bool, bool, bool, bool, bool)
     def getMusicTroggle(self, musicTroggle1, musicTroggle2, musicTroggle3, musicTroggle4, musicTroggle5,musicTroggle6,musicTroggle7,musicTroggle8):
@@ -431,7 +443,7 @@ class MainWindow(QObject):
 
 
 def save():
-    list_save = [current_id, boolint(wand_troggle), boolint(music_troggle), boolint(off_troggle), boolint(sleep_troggle), boolint(paint_troggle),
+    list_save = [current_id, boolint(wand_troggle), boolint(music_troggle), boolint(off_troggle), boolint(screen_troggle), boolint(paint_troggle),
                  int(sleep_from[0]),int(sleep_from[1]),int(sleep_to[0]),int(sleep_to[1]),value_light,value_laud,music_mode,light_mode,color_1,color_2
     ]
     cursor.execute("DELETE FROM info WHERE id = ?",[current_id])

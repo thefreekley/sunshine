@@ -52,6 +52,7 @@ Item {
                     labelNameMone.text = qsTr("Mode:music visualisation")
                     wandLight.troggle = false
                     iconMusic.troggle = true
+                    screenLight.troggle = false
 
                      smallButtonMusic1.troggle = (backend.musicModeNumber() == 1) ? true : false
                     smallButtonMusic2.troggle = (backend.musicModeNumber() == 2) ? true : false
@@ -75,6 +76,7 @@ Item {
                     labelNameMone.text = qsTr("Mode:light")
                     iconMusic.troggle = false
                     wandLight.troggle = true
+                    screenLight.troggle = false
 
                     lightButton1.troggle =  (backend.lightModeNumber() == 1) ? true : false
                     lightButton2.troggle =  (backend.lightModeNumber() == 2) ? true : false
@@ -117,8 +119,30 @@ Item {
                     lightButton3.troggle = false
                     lightButton4.troggle = false
                 }
-                if(imageSource == "../images/icon/sleep.png"){
-                    timerToSleep.running = root.troggle
+                if(imageSource == "../images/icon/screen.png"){
+
+
+                    labelNameMone.text = qsTr("Mode:screen")
+                    screenLight.troggle = true
+                    iconMusic.troggle = false
+                    wandLight.troggle = false
+                    painLight.troggle = false
+
+
+                    smallButtonMusic1.troggle = false
+                    smallButtonMusic2.troggle = false
+                    smallButtonMusic3.troggle = false
+                    smallButtonMusic4.troggle = false
+                    smallButtonMusic5.troggle = false
+                    smallButtonMusic6.troggle = false
+                    smallButtonMusic7.troggle = false
+                    smallButtonMusic8.troggle = false
+
+                    lightButton1.troggle = false
+                    lightButton2.troggle = false
+                    lightButton3.troggle = false
+                    lightButton4.troggle = false
+
                 }
 
                 aplicationWindow.callModeBackend()

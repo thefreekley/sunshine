@@ -18,7 +18,7 @@ Window {
 
 
     function callModeBackend(){
-        backend.getModeTroggle(wandLight.troggle,iconMusic.troggle,iconOff.troggle,sleepLight.troggle,painLight.troggle)
+        backend.getModeTroggle(wandLight.troggle,iconMusic.troggle,iconOff.troggle,screenLight.troggle,painLight.troggle)
 
         backend.getLightTroggle(lightButton1.troggle,lightButton2.troggle,lightButton3.troggle,lightButton4.troggle)
 
@@ -128,11 +128,11 @@ Window {
 
 
                 RoundButtonImg  {
-                    id: sleepLight
+                    id: screenLight
                     width: 50
                     height: 50
-                    troggle: backend.modeNumber("sleep")
-                    imageSource: "../images/icon/sleep.png"
+                    troggle: backend.modeNumber("screen")
+                    imageSource: "../images/icon/screen.png"
                     x_value: 100
                     y_value: 110
 

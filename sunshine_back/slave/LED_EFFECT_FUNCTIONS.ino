@@ -1,6 +1,21 @@
 //------------------------LED EFFECT FUNCTIONS------------------------
 
 //-------------------------------Strobe---------------------------------------
+
+void wtfMode1(int count){
+ uint8_t sinBeat = beatsin8(30,0,LED_COUNT-1,0,0);
+ uint8_t sinBeat1 = beatsin8(30,0,LED_COUNT-1,0,LED_COUNT-1);
+ 
+ leds[sinBeat]  = ColorFromPalette( GradientPalette,0+sinBeat/5);
+ leds[sinBeat1] = ColorFromPalette( GradientPalette,128 + sinBeat1/5); 
+  
+ blur1d(leds,LED_COUNT,50);
+ fadeToBlackBy(leds,LED_COUNT,10);
+ 
+ FastLED.show(); 
+}
+
+
 void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, int EndPause) {
  one_color_all(255, 255, 255); LEDS.show();
   delay(200);

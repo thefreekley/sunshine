@@ -65,6 +65,7 @@ boolean paintTheme = false;
 boolean screenTheme = false;
 byte bright = 255;
 byte gradientColors[12] = {0,255,0,40,128,0,0,60,255,255,0,40};
+byte screenColor[6]= {0,0,0,0,0,0};
 
 byte amplitude = 0;
 
@@ -85,6 +86,7 @@ byte hourToSleep = 0;
 
 CRGBPalette16 GradientPalette;
 
+CRGBPalette16 gPal;
 
 
 void setup(){
@@ -136,7 +138,7 @@ void setup(){
   radio.powerUp(); //начать работу
   radio.startListening();  //начинаем слушать эфир, мы приёмный модуль
   change_mode(lightTheme);
-   
+  gPal = HeatColors_p;
 }
 
 void loop(void) {
@@ -167,15 +169,16 @@ void loop(void) {
      else if (countTimes==2) command = number;
      else if (countTimes==3){
         items[0] = number;
-        if(command == 1 || command == 2 || command == 3 || command == 4 || command == 5 )process = true;
+        if(command == 1 || command == 2 || command == 3 || command == 4 )process = true;
      }
      else if (countTimes==4){
         items[1] = number;
-        if(command == 6)process = true;
+        if(command == 6 )process = true;
      }
      else{
         items[countTimes-3] = (byte)number;
-        if (countTimes==8) process = true;
+        if (countTimes==8 && command == 7 ) process = true;
+        if (countTimes==5 && command == 5 ) process = true;
      }
      
      
@@ -200,8 +203,6 @@ void loop(void) {
         case 1:
         musicTheme = items[0];
         lightTheme = 0;
-        screenTheme = false;
-        paintTheme = false;
         one_color_all(0, 0, 0);
         clearGlitterArr();
         break;
@@ -209,10 +210,7 @@ void loop(void) {
         case 2:
         lightTheme = items[0];
         change_mode(lightTheme);
-        musicTheme = 0;
-        screenTheme = false;
-        paintTheme = false;
-        
+        musicTheme = 0;      
         break;
         
         case 4:
@@ -220,10 +218,20 @@ void loop(void) {
         break;
 
         case 5:
-          lightTheme = 0;
+         
+          screenColor[0] =  screenColor[3];
+          screenColor[1] =  screenColor[4];
+          screenColor[2] =  screenColor[5];
+
+          screenColor[3] = items[0];
+          screenColor[4] = items[1];
+          screenColor[5] = items[2];
+       
+            
+          
+          lightTheme = 6;
           musicTheme = 0;
-          screenTheme = true;
-          paintTheme = false;
+         
         break;
         
         case 6:
@@ -263,13 +271,14 @@ void loop(void) {
     else if (lightTheme == 3) rainbow_loop();
     else if (lightTheme == 4) new_rainbow_loop();
     else if (lightTheme == 5) gradientShow();
+    else if (lightTheme == 6) screenMode();
     
 
     if( musicTheme == 1) gradientMusicMode(amplitude,1);
     else if( musicTheme == 2) gradientMusicMode(amplitude,2);
     else if( musicTheme == 3) gradientMusicMode(amplitude,3);
     else if( musicTheme == 4) gradientMusicMode(amplitude,4);
-    else if( musicTheme == 5)gradientMusicMode(amplitude,5);
+    else if( musicTheme == 5)Fire2012WithPalette(amplitude); 
     else if( musicTheme == 6)frequencySplit(amplitude); 
     else if( musicTheme == 7) slideGrlitters(amplitude); 
     else if( musicTheme == 8) colorTape(amplitude); 

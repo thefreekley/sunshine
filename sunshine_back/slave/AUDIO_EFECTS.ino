@@ -126,6 +126,9 @@ void slideGrlitters(int count){
    for(int i =0;i<LED_COUNT/2;i++){
     leds[i] = leds[LED_COUNT - i -1]; 
    }
+
+ 
+ 
    
    
    LEDS.show();
