@@ -16,7 +16,7 @@ void gradientMusicMode(int count,byte modeOfMusic){
   count = map(count, 2, 255, 0, LED_COUNT);
    if(count - go_to_count>3) add_glitter=true; 
   if(go_to_count!=count && go_to_count==current_count) go_to_count =  count;
-//  if(go_to_count==count && go_to_count==current_count && count!=0) go_to_count = random( 0, go_to_count);
+  if(go_to_count==count && go_to_count==current_count && count!=0) go_to_count = random( (go_to_count - go_to_count/6) >0 ? (go_to_count - go_to_count/6): 0, (go_to_count + go_to_count/6) < LED_COUNT ? (go_to_count + go_to_count/6): LED_COUNT-1 );
   if(go_to_count<count)go_to_count=count;
   
  

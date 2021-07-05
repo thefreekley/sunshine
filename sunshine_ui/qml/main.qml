@@ -11,11 +11,45 @@ Window {
     height: 650
     visible: true
     color: "#00000000"
-    title: qsTr("Hello World")
+    title: qsTr("Sunshine")
 
     property int previousX
     property int previousY
 
+
+        Component.onCompleted: {
+            setSerialPort()
+            setIdList()
+            setAudioInput()
+        }
+
+    function setSerialPort(){
+        var serialPortStr = backend.callSerialPortList();
+        var serialPortListSplit = (serialPortStr).split("-")
+        for(var i = 0; i < serialPortListSplit.length;i++){
+            compCombobox.new_model.append({ text:serialPortListSplit[i]})
+    }
+
+    }
+
+    function setIdList(){
+        var idStr = backend.callIdListName();
+        var idListSplit = (idStr).split("-")
+        for(var i = 0; i < idListSplit.length;i++){
+            idCombobox.new_model.append({ text:idListSplit[i]})
+    }
+
+    }
+
+
+    function setAudioInput(){
+        var audioInputStr = backend.callAudioInputList();
+        var audioInputSplit = (audioInputStr).split("-")
+        for(var i = 0; i < audioInputSplit.length;i++){
+            inputCombobox.new_model.append({ text:audioInputSplit[i]})
+    }
+
+    }
 
     function callModeBackend(){
         backend.getModeTroggle(wandLight.troggle,iconMusic.troggle,iconOff.troggle,screenLight.troggle,painLight.troggle)
@@ -171,9 +205,8 @@ Window {
 
                     CustomCombobox {
                         id: idCombobox
+                        Component.onCompleted: idCombobox.selectText = backend.callLastIdName()
                         new_model: ListModel{
-                            ListElement { text: "id:77"}
-                            ListElement { text: "id:88"}
 
                         }
                     }
@@ -181,21 +214,19 @@ Window {
                     CustomCombobox {
                         y: 50
                         id: compCombobox
+                        Component.onCompleted: compCombobox.selectText = backend.callCompName()
+
                         new_model: ListModel{
-                            ListElement { text: "COMP4"}
-                            ListElement { text: "COMP3"}
-                            ListElement { text: "COMP5"}
 
                         }
 
                     }
                     CustomCombobox {
                         id: inputCombobox
+                        fontSize: 11
                         y:100
                         new_model: ListModel{
-                            ListElement { text: "Stereo Mixer"}
-                            ListElement { text: "ASUS VH222"}
-                            ListElement { text: "MICRO 3-USB"}
+
 
                         }
 
@@ -257,7 +288,7 @@ Window {
                                 for(var i=0; i< idCombobox.new_model.count;i++){
                                     var item = idCombobox.new_model.get(i).text
 
-                                    console.log(item,idInput.text.toString())
+
                                     if(item == ("id:" + idInput.text.toString())){
                                         sameId = 1
                                     }

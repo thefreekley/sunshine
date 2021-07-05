@@ -46,11 +46,12 @@ class AmplitudeLevel(object):
         self.pa = pyaudio.PyAudio()
 
         self.input_devices = self.find_input_device()
-        self.name_input = ""
-        for item in self.input_devices:
-            if  item['name'].find('микшер')!=-1 or item['name'].find('mix')!=-1:
-                self.input_device = int(item['index'])
-                self.name_input = item['name']
+        self.name_input = "Стерео микшер (Realtek High Def"
+        self.input_device = 3
+        # for item in self.input_devices:
+        #     if  item['name'].find('микшер')!=-1 or item['name'].find('mix')!=-1:
+        #         self.input_device = int(item['index'])
+        #         self.name_input = item['name']
 
         self.stream = self.open_mic_stream()
 

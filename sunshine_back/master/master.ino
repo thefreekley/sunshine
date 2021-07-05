@@ -23,13 +23,13 @@ void setup(){
   radio.setAutoAck(1);         //режим подтверждения приёма, 1 вкл 0 выкл
   radio.setRetries(0,15);     //(время между попыткой достучаться, число попыток)
   radio.enableAckPayload();    //разрешить отсылку данных в ответ на входящий сигнал
-  radio.setPayloadSize(32);     //размер пакета, в байтах
+  radio.setPayloadSize(1);     //размер пакета, в байтах
 
   radio.openWritingPipe(address[0]);   //мы - труба 0, открываем канал для передачи данных
   radio.setChannel(0x60);  //выбираем канал (в котором нет шумов!)
 
   radio.setPALevel (RF24_PA_MAX); //уровень мощности передатчика. На выбор RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX
-  radio.setDataRate (RF24_1MBPS); 
+  radio.setDataRate (RF24_2MBPS); 
 
   radio.powerUp(); 
   radio.stopListening();  

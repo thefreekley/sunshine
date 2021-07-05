@@ -12,6 +12,19 @@ import sqlite3
 import serial
 import math
 import win32gui
+import serial_ports
+
+comport_name = "COM5"
+list_id = [1,0]
+last_id = 1
+
+
+audio_input = AmplitudeLevel()
+
+for i in range(len(audio_input.find_input_device())):
+    print(audio_input.find_input_device()[i].get("name"))
+
+coef_frequence = [0]*7
 
 conn = sqlite3.connect("database_sunshine.db")
 cursor = conn.cursor()
@@ -29,7 +42,7 @@ def mapping(num,max_cur,max_new): #start - 0
     return int(coef*num)
 
 
-import win32gui
+
 
 
 def pixel_color_at(x, y):
@@ -96,8 +109,6 @@ else:
     color_2 = info_database[0][15]
 
 
-audio_input = AmplitudeLevel()
-coef_frequence = [0]*7
 
 class MainWindow(QObject):
     def __init__(self):
@@ -106,6 +117,8 @@ class MainWindow(QObject):
         self.screen_timer.timeout.connect(self.screenInfo)
         if screen_troggle:
             self.screen_timer.start(1000)
+
+
 
         self.timer_equalizer = QTimer()
         self.timer_equalizer.timeout.connect(self.equalizerCurves)
@@ -185,6 +198,17 @@ class MainWindow(QObject):
 
         return new_coef_frequence[index]
 
+    @Slot(result=str)
+    def callSerialPortList(self):
+#        serial_ports_list =  serial_ports.serial_ports()
+        str_serial_ports = "COM5-COM7-COM9-COM12"
+#        for i in serial_ports_list:
+#            str_serial_ports+=i
+#            str_serial_ports+="-"
+#        print(str_serial_ports)
+
+        return str_serial_ports
+
     def doWork(self):
         global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day,delta_time
 
@@ -230,6 +254,38 @@ class MainWindow(QObject):
     def lightModeNumber(self):
         global light_mode
         return light_mode
+
+    @Slot(result=str)
+    def callCompName(self):
+        global comport_name
+        return comport_name
+
+    @Slot(result=str)
+    def callLastIdName(self):
+        global last_id
+        return ("id:" + str(last_id))
+
+    @Slot(result=str)
+    def callIdListName(self):
+        global list_id
+        str_list_id = ""
+        for i in list_id:
+            str_list_id+= "id:" + str(i) + "-"
+        str_list_id = str_list_id[:-1]
+
+        return str_list_id
+
+
+
+    @Slot(result=str)
+    def callAudioInputList(self):
+        audio_list_str = ""
+        for i in range(len(audio_input.find_input_device())):
+            input_item = audio_input.find_input_device()[i].get("name")
+            audio_list_str += input_item + "-"
+
+        return audio_list_str[:-1]
+
 
     @Slot(result=int)
     def musicModeNumber(self):

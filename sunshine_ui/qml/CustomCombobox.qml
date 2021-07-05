@@ -11,21 +11,25 @@ Item {
  height:42
  id: root
  property ListModel new_model: [""]
-
+ property string selectText: ""
+ property int fontSize: 14
 FontLoader {
         id: bebasFont1
         source: "../font/BebasNeue Regular.ttf"
         }
 
  ComboBox {
+
   id:equipmentList
   anchors.verticalCenter: parent.verticalCenter
   width: 210
   height:32
-   onActivated: {
 
-       backend.getId(root.new_model.get(equipmentList.currentIndex).text)
-        label.text = root.new_model.get(equipmentList.currentIndex).text
+   Component.onCompleted: currentIndex = find(root.selectText)
+
+   onActivated: {
+//       backend.getId(root.new_model.get(equipmentList.currentIndex).text)
+//        label.text = root.new_model.get(equipmentList.currentIndex).text
    }
 
   model: root.new_model
@@ -47,7 +51,7 @@ FontLoader {
               id:textItem
               text: modelData
               color: hovered?"#ffea00":"white"
-              font.pointSize: 14
+              font.pointSize: fontSize
               anchors.centerIn: parent
               font.family: bebasFont1.name
 
@@ -83,7 +87,7 @@ FontLoader {
 
         leftPadding: -10
          text: equipmentList.displayText
-         font.pointSize: 14
+         font.pointSize: fontSize
           anchors.centerIn: parent
           font.family: bebasFont1.name
          color: "white"
