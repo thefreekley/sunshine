@@ -13,6 +13,10 @@ Item {
  property ListModel new_model: [""]
  property string selectText: ""
  property int fontSize: 14
+ function activationBackend(value){
+
+ }
+
 FontLoader {
         id: bebasFont1
         source: "../font/BebasNeue Regular.ttf"
@@ -27,9 +31,8 @@ FontLoader {
 
    Component.onCompleted: currentIndex = find(root.selectText)
 
-   onActivated: {
-//       backend.getId(root.new_model.get(equipmentList.currentIndex).text)
-//        label.text = root.new_model.get(equipmentList.currentIndex).text
+   onActivated: {        
+       activationBackend(root.new_model.get(equipmentList.currentIndex).text)
    }
 
   model: root.new_model

@@ -46,6 +46,7 @@ Item {
                 root.clicked()
                 root.troggle = (root.troggle == true) ? false : true
                 backend.getTieConnect(root.troggle)
+                if (root.troggle) label.text = "ALL"
             }
 
 

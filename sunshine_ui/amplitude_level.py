@@ -42,17 +42,10 @@ def fft_transform(data):
 
 
 class AmplitudeLevel(object):
-    def __init__(self):
+    def __init__(self,index_input):
         self.pa = pyaudio.PyAudio()
-
         self.input_devices = self.find_input_device()
-        self.name_input = "Стерео микшер (Realtek High Def"
-        self.input_device = 3
-        # for item in self.input_devices:
-        #     if  item['name'].find('микшер')!=-1 or item['name'].find('mix')!=-1:
-        #         self.input_device = int(item['index'])
-        #         self.name_input = item['name']
-
+        self.input_device = index_input
         self.stream = self.open_mic_stream()
 
     def find_input_device(self):

@@ -113,7 +113,11 @@ Window {
 
                     Label {
                         id: label
-                        text: qsTr("ID:77")
+                        Component.onCompleted: {
+                            if(treeButton.troggle==false) label.text = backend.callId()
+                            else label.text = "ALL"
+                        }
+
                         font.family: bebasRegularFont.name
                         anchors.centerIn: parent
                         anchors.top: parent.top
@@ -204,7 +208,13 @@ Window {
 
 
                     CustomCombobox {
-                        id: idCombobox
+                        id: idCombobox 
+                        function activationBackend(value){
+                            backend.getNewId(value)
+                            if(treeButton.troggle==false){
+                                label.text = backend.callId()
+                            }
+                        }
                         Component.onCompleted: idCombobox.selectText = backend.callLastIdName()
                         new_model: ListModel{
 
@@ -214,6 +224,14 @@ Window {
                     CustomCombobox {
                         y: 50
                         id: compCombobox
+
+                        function activationBackend(value){
+                            backend.getNewCompPort(value)
+                            errComp.opacity = (backend.callErrComport() == 1)? 0:1
+
+
+                        }
+
                         Component.onCompleted: compCombobox.selectText = backend.callCompName()
 
                         new_model: ListModel{
@@ -223,6 +241,12 @@ Window {
                     }
                     CustomCombobox {
                         id: inputCombobox
+                        Component.onCompleted: inputCombobox.selectText = backend.callLastIndexInput()
+                        function activationBackend(value){
+                            backend.getInputDevice(value)
+                           errAudioInput.opacity = (backend.errAudioDevice() == 1)? 0:1
+
+                        }
                         fontSize: 11
                         y:100
                         new_model: ListModel{
@@ -1043,6 +1067,35 @@ Window {
 
 
 
+                }
+
+                Label {
+                    id: errComp
+                    width: 73
+                    height: 13
+                    font.pointSize: 11
+                    color: "#ffffff"
+                    opacity: (backend.callErrComport() == 1)? 0:1
+                    text: qsTr("Error")
+                    font.family: bebasFont1.name
+                    anchors.left: column.right
+                    anchors.top: column.bottom
+                    anchors.topMargin: -515
+                    anchors.leftMargin: 6
+                }
+                Label {
+                    id: errAudioInput
+                    width: 73
+                    height: 13
+                    font.pointSize: 11
+                    color: "#ffffff"
+                    opacity: (backend.errAudioDevice() == 1)? 0:1
+                    text: qsTr("Error")
+                    font.family: bebasFont1.name
+                    anchors.left: column.right
+                    anchors.top: column.bottom
+                    anchors.topMargin: -465
+                    anchors.leftMargin: 6
                 }
             }
 

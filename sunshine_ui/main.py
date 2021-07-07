@@ -10,26 +10,36 @@ from PIL import ImageColor
 import time
 import sqlite3
 import serial
+from serial.tools import list_ports
 import math
 import win32gui
 import serial_ports
 
 comport_name = "COM5"
+open_comport_troggle = False
 list_id = [1,0]
 last_id = 1
+last_index_input = 3
+last_input_name = ""
 
+try:
+    audio_input = AmplitudeLevel(last_index_input)
+    open_audio_troggle = True
+except:
+    open_audio_troggle = False
 
-audio_input = AmplitudeLevel()
-
-for i in range(len(audio_input.find_input_device())):
-    print(audio_input.find_input_device()[i].get("name"))
 
 coef_frequence = [0]*7
 
 conn = sqlite3.connect("database_sunshine.db")
 cursor = conn.cursor()
 
-ser = serial.Serial('COM5', 9600, timeout=0)
+try:
+    ser = serial.Serial(comport_name, 9600, timeout=0)
+    open_comport_troggle = True
+except:
+    open_comport_troggle = False
+
 delta_time = 0
 def boolint(boolean):
     return 1 if boolean else 0
@@ -137,11 +147,13 @@ class MainWindow(QObject):
 
 
     def equalizerCurves(self):
-        global coef_frequence,troggle_equalizer,amplituda,in_max, audio_input
+        global coef_frequence,troggle_equalizer,amplituda,in_max, audio_input,open_audio_troggle
         old_coef_frequence = coef_frequence
         coef_frequence = []
-        fft_out = audio_input.get_fft()
-
+        if(open_audio_troggle):
+            fft_out = audio_input.get_fft()
+        else:
+            fft_out = [0]*7
 
 
         for i in range(len(fft_out)):
@@ -157,10 +169,13 @@ class MainWindow(QObject):
                     if coef_frequence[i]/ (old_coef_frequence[i] + 0.0001)>10:
                         byte_value = byte_value + 2**i
 
-                ser.write(bytes([int(byte_value+3)]))
+                if(open_comport_troggle):
+                    ser.write(bytes([int(byte_value+3)]))
             else:
-
-                a = int(audio_input.listen())
+                if(open_audio_troggle):
+                    a = int(audio_input.listen())
+                else:
+                    a = 0
 
                 amplitude_filter = mapping(a, 6001, value_laud/2)
 
@@ -168,8 +183,8 @@ class MainWindow(QObject):
 
                 if amplitude_filter > 255:
                     amplitude_filter = 255
-
-                ser.write(bytes([amplitude_filter]))
+                if (open_comport_troggle):
+                    ser.write(bytes([amplitude_filter]))
 
 
 
@@ -200,14 +215,22 @@ class MainWindow(QObject):
 
     @Slot(result=str)
     def callSerialPortList(self):
-#        serial_ports_list =  serial_ports.serial_ports()
-        str_serial_ports = "COM5-COM7-COM9-COM12"
-#        for i in serial_ports_list:
-#            str_serial_ports+=i
-#            str_serial_ports+="-"
-#        print(str_serial_ports)
+        global comport_name
 
-        return str_serial_ports
+        serial_ports_list =  [p.device for p in list_ports.comports()]
+
+        str_serial_ports = ""
+        for i in serial_ports_list:
+            if str_serial_ports.find(i)==-1:
+                str_serial_ports+=i
+                str_serial_ports+="-"
+
+        if(str_serial_ports.find(comport_name) == -1):
+            temp_str =  str_serial_ports
+            str_serial_ports += ""
+            str_serial_ports = temp_str + comport_name + "-"
+
+        return str_serial_ports[0:-1]
 
     def doWork(self):
         global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day,delta_time
@@ -266,6 +289,11 @@ class MainWindow(QObject):
         return ("id:" + str(last_id))
 
     @Slot(result=str)
+    def callLastIndexInput(self):
+        global last_input_name
+        return last_input_name
+
+    @Slot(result=str)
     def callIdListName(self):
         global list_id
         str_list_id = ""
@@ -279,10 +307,21 @@ class MainWindow(QObject):
 
     @Slot(result=str)
     def callAudioInputList(self):
+        global last_input_name,last_index_input
         audio_list_str = ""
         for i in range(len(audio_input.find_input_device())):
+
             input_item = audio_input.find_input_device()[i].get("name")
+            if(len(input_item)>25):
+                input_item = input_item[0:23]
+                if input_item[-1] == " ":
+                    if input_item.find("(")!=-1:
+                        input_item = input_item[:-1] + ")"
+                else:
+                    input_item += "..)"
             audio_list_str += input_item + "-"
+            if(audio_input.find_input_device()[i].get("index") == last_index_input ):
+                last_input_name = input_item
 
         return audio_list_str[:-1]
 
@@ -307,10 +346,6 @@ class MainWindow(QObject):
         return value_light
 
 
-    @Slot(str)
-    def getId(self,id_string):
-
-        print( int(id_string[3:]))
 
     @Slot(int)
     def getSliderLightValue(self, value):
@@ -320,11 +355,56 @@ class MainWindow(QObject):
 
             self.toController(broadcast=tie_device, id=current_id, mode=4, item=[value_light])
 
+    @Slot(str)
+    def getNewId(self, value):
+        global current_id
+        current_id = int(value.replace("id:",""))
+
+    @Slot(result=str)
+    def callId(self):
+        global current_id
+        return "id:" + str(current_id)
+
+    @Slot(str)
+    def getNewCompPort(self, value):
+        global comport_name,ser,open_comport_troggle
+        ser.close()
+        try:
+            ser = serial.Serial(value, 9600, timeout=0)
+            open_comport_troggle = True
+        except (OSError, serial.SerialException):
+            open_comport_troggle = False
+
+        
+        comport_name = value
+
+    @Slot(str)
+    def getInputDevice(self, value):
+        global audio_input,last_index_input,open_audio_troggle
+        for i in range(len(audio_input.find_input_device())):
+            input_item = audio_input.find_input_device()[i].get("name")
+            if input_item.find(value[0:-4])!=-1:
+                last_index_input=i
+        try:
+            audio_input = AmplitudeLevel(last_index_input)
+            open_audio_troggle = True
+        except:
+            open_audio_troggle = False
+
+    @Slot(result=bool)
+    def errAudioDevice(self):
+        global open_audio_troggle
+        return open_audio_troggle
 
     @Slot(result=int)
     def loudSliderValue(self):
         global value_laud
         return value_laud
+
+    @Slot(result=bool)
+    def callErrComport(self):
+        global open_comport_troggle
+        return open_comport_troggle
 
     @Slot(int)
     def getSliderLoundValue(self, value):
@@ -477,23 +557,24 @@ class MainWindow(QObject):
 
 
     def toController(self,broadcast, id, mode, item):
-        self.timer_equalizer.stop()
-        time.sleep(0.02)
-        if broadcast is False:
-            ser.write(bytes([0]))
+        if (open_comport_troggle):
+            self.timer_equalizer.stop()
             time.sleep(0.02)
-            ser.write(bytes([id]))
-        else:
-            ser.write(bytes([1]))
-        time.sleep(0.02)
-        ser.write(bytes([mode]))
-        time.sleep(0.02)
-        for i in item:
-            ser.write(bytes([i]))
+            if broadcast is False:
+                ser.write(bytes([0]))
+                time.sleep(0.02)
+                ser.write(bytes([id]))
+            else:
+                ser.write(bytes([1]))
             time.sleep(0.02)
+            ser.write(bytes([mode]))
+            time.sleep(0.02)
+            for i in item:
+                ser.write(bytes([i]))
+                time.sleep(0.02)
 
-        time.sleep(0.02)
-        self.timer_equalizer.start(time_to_send_audio)
+            time.sleep(0.02)
+            self.timer_equalizer.start(time_to_send_audio)
 
 
 
