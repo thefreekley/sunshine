@@ -17,8 +17,8 @@ boolean process;
 byte counter=0;
 
 void setup(){
+  
   Serial.begin(9600); //открываем порт для связи с ПК
-
   radio.begin(); //активировать модуль
   radio.setAutoAck(1);         //режим подтверждения приёма, 1 вкл 0 выкл
   radio.setRetries(0,15);     //(время между попыткой достучаться, число попыток)
@@ -37,11 +37,18 @@ void setup(){
 }
 
 void loop(void) {
-
+     static byte counter = 0;
+     counter++;
+     counter%=10;
+     if(counter==0)Serial.println("tfk");
+     
      if (Serial.available()) {
      byte number = Serial.read();
      sendTo(number);
      }
+    
+     
+     
 //  static unsigned long timeLastReceive= 0;
 //  if (Serial.available()) {
 //     byte number = Serial.read();  

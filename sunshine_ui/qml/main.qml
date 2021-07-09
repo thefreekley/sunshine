@@ -52,6 +52,7 @@ Window {
     }
 
     function callModeBackend(){
+
         backend.getModeTroggle(wandLight.troggle,iconMusic.troggle,iconOff.troggle,screenLight.troggle,painLight.troggle)
 
         backend.getLightTroggle(lightButton1.troggle,lightButton2.troggle,lightButton3.troggle,lightButton4.troggle)
@@ -60,7 +61,37 @@ Window {
                                 smallButtonMusic5.troggle,smallButtonMusic6.troggle,smallButtonMusic7.troggle,smallButtonMusic8.troggle)
 
         save.opacity = 0.8
+        animationLoader(true,500)
     }
+    Timer {
+          id: timerLoader
+          interval: 5000; running: true; repeat: false
+          onTriggered: animationLoader(false)
+    }
+
+    Timer {
+          id: stopRoatLoader
+          interval: 100; running: true; repeat: false
+          onTriggered: animationLoaderRotate.stop()
+    }
+
+
+    function animationLoader(state,during){
+        loader.stateLoader=state
+        if(loader.stateLoader){
+            animationLoaderRotate.start()
+            animationLoaderOpacityUp.start()
+            timerLoader.interval = during
+            timerLoader.start()
+        }
+        else{
+            animationLoaderOpacityDown.start()
+            stopRoatLoader.start()
+        }
+
+    }
+
+
 
     FontLoader {
         id: bebasRegularFont
@@ -140,6 +171,56 @@ Window {
                         font.pointSize: 10
                         color:  "#9a4268"
                     }
+
+
+                }
+
+
+
+                Rectangle {
+
+                    id: loader
+                    x: 390
+                    y: 185
+                    width: 260
+                    height: 260
+                    radius: 100
+                    color: "#00000000"
+                    anchors.top: parent.top
+                    anchors.topMargin: 67
+                    anchors.centerIn: parent
+                    property bool stateLoader: false
+                    Component.onCompleted: {
+                        animationLoaderOpacityDown.start()
+                    }
+
+
+                    Image
+                    {
+                        anchors.centerIn: parent
+                        width: 220
+                        height: 220
+                        source: "../images/other/round.png"
+                        RotationAnimation on rotation {
+                            id: animationLoaderRotate
+                            running: true
+                            from: 0
+                            to: 360
+                            duration: 16000
+                            loops: Animation.Infinite
+                        }
+                        NumberAnimation on opacity {
+                               running: false
+                              id: animationLoaderOpacityUp
+                              from: 0; to: 1
+                          }
+                        NumberAnimation on opacity {
+                               running: false
+                               id: animationLoaderOpacityDown
+                               from: 1; to: 0
+                          }
+                    }
+
                 }
 
                 RoundButtonImg  {
@@ -212,6 +293,7 @@ Window {
                         function activationBackend(value){
                             backend.getNewId(value)
                             if(treeButton.troggle==false){
+                                animationLoader(true,500)
                                 label.text = backend.callId()
                             }
                         }
@@ -226,11 +308,22 @@ Window {
                         id: compCombobox
 
                         function activationBackend(value){
+                            animationLoader(true,5000)
                             backend.getNewCompPort(value)
-                            errComp.opacity = (backend.callErrComport() == 1)? 0:1
+                            timerUpdateErr.start()
 
 
                         }
+                        Timer {
+                            id: timerUpdateErr
+                            interval: 5000;
+                            running: false;
+                            repeat: false
+                            onTriggered: {
+                                errComp.opacity = (backend.callErrComport() == 1)? 0:1
+                            }
+                        }
+
 
                         Component.onCompleted: compCombobox.selectText = backend.callCompName()
 
@@ -243,6 +336,7 @@ Window {
                         id: inputCombobox
                         Component.onCompleted: inputCombobox.selectText = backend.callLastIndexInput()
                         function activationBackend(value){
+                            animationLoader(true,1000)
                             backend.getInputDevice(value)
                            errAudioInput.opacity = (backend.errAudioDevice() == 1)? 0:1
 
@@ -1745,3 +1839,9 @@ Window {
 
 
 
+
+/*##^##
+Designer {
+    D{i:0;formeditorZoom:2}
+}
+##^##*/

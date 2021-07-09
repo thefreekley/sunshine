@@ -47,6 +47,7 @@ Item {
                 root.troggle = (root.troggle == true) ? false : true
                 backend.getTieConnect(root.troggle)
                 if (root.troggle) label.text = "ALL"
+                else label.text = backend.callId()
             }
 
 

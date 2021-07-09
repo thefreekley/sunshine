@@ -31,7 +31,8 @@ FontLoader {
 
    Component.onCompleted: currentIndex = find(root.selectText)
 
-   onActivated: {        
+   onActivated: {
+
        activationBackend(root.new_model.get(equipmentList.currentIndex).text)
    }
 

@@ -140,6 +140,8 @@ class MainWindow(QObject):
 
 
 
+
+
     def screenInfo(self):
         screenColors = pixel_color_at(*win32gui.GetCursorPos())
         self.toController(broadcast=tie_device, id=current_id, mode=5, item=screenColors)
@@ -359,6 +361,7 @@ class MainWindow(QObject):
     def getNewId(self, value):
         global current_id
         current_id = int(value.replace("id:",""))
+        print(serial_ports.serial_ports())
 
     @Slot(result=str)
     def callId(self):
@@ -371,11 +374,20 @@ class MainWindow(QObject):
         ser.close()
         try:
             ser = serial.Serial(value, 9600, timeout=0)
-            open_comport_troggle = True
+            open_comport_troggle = False
+            time.sleep(3)
+
+            for i in range(0,1000):
+                if (str(ser.readline())).find("tfk") != -1:
+                    print(str(ser.readline()))
+                    open_comport_troggle = True
+
+
+
         except (OSError, serial.SerialException):
             open_comport_troggle = False
 
-        
+
         comport_name = value
 
     @Slot(str)
