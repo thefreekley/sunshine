@@ -26,5 +26,13 @@ cursor.execute( """ CREATE TABLE info (
                    color_2 TEXT  NOT NULL
                    ) """ )
 
+cursor.execute( """ CREATE TABLE last_data (
+                 
+                   last_id INT NOT NULL,
+                   last_comp TEXT  NOT NULL,
+                   last_audio_input INT NOT NULL,
+                   last_equalizer INT NOT NULL
+                   ) """ )
+
 
 conn.commit()

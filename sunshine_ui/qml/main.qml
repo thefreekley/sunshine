@@ -93,6 +93,8 @@ Window {
 
 
 
+
+
     FontLoader {
         id: bebasRegularFont
         source: "../font/BebasNeue Regular.ttf"
@@ -197,6 +199,7 @@ Window {
 
                     Image
                     {
+                        id: roundLoader
                         anchors.centerIn: parent
                         width: 220
                         height: 220
@@ -321,6 +324,7 @@ Window {
                             repeat: false
                             onTriggered: {
                                 errComp.opacity = (backend.callErrComport() == 1)? 0:1
+                                errComp.text = "error"
                             }
                         }
 
@@ -1175,7 +1179,7 @@ Window {
                     anchors.left: column.right
                     anchors.top: column.bottom
                     anchors.topMargin: -515
-                    anchors.leftMargin: 6
+                    anchors.leftMargin: 30
                 }
                 Label {
                     id: errAudioInput
@@ -1190,6 +1194,74 @@ Window {
                     anchors.top: column.bottom
                     anchors.topMargin: -465
                     anchors.leftMargin: 6
+                }
+
+
+
+
+
+                Image {
+                    id: findComp
+                    x: 222
+                    y: 78
+                    width: 18
+                    height: 20
+                    source: "../images/icon/find.png"
+                    fillMode: Image.PreserveAspectFit
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+
+
+
+                        Timer {
+                              id: timerFindComp
+                              interval: 1000; running: true; repeat: false
+                              onTriggered: {
+
+                                  if(backend.proccesCompFind() == true){
+                                      errComp.text = "load.."
+                                      errComp.opacity = 1
+                                      animationLoaderRotate.start()
+                                      timerFindComp.start()
+                                      roundLoader.opacity = 1
+
+                                  }
+                                  else{
+                                      if(backend.callErrComport() == true){
+                                          errComp.text = "error"
+                                          errComp.opacity = 0
+                                      }
+                                      else{
+                                          errComp.text = "not found"
+                                          errComp.opacity = 1
+                                      }
+
+
+                                       animationLoaderRotate.stop()
+                                      animationLoaderOpacityDown.start()
+                                      compCombobox.selectText = backend.callCompName()
+                                      compCombobox.update()
+                                  }
+
+                              }
+                        }
+
+
+
+
+
+                        onEntered: findComp.opacity = 0.6
+                        onExited: findComp.opacity = 1
+
+                        onClicked: {
+                             animationLoaderRotate.start()
+                             animationLoaderOpacityUp.start()
+                             timerFindComp.start()
+                             backend.startProccesCompFind()
+                        }
+                    }
+
                 }
             }
 
@@ -1842,6 +1914,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:2}
+    D{i:0;formeditorZoom:1.5}
 }
 ##^##*/

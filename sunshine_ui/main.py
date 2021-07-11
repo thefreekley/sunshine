@@ -73,8 +73,8 @@ progress_percent = 0
 tie_device = False
 time_to_send_audio = 20
 in_max = 1000000
-
-
+comp_find_count = 0
+comp_find_process = False
 
 print(info_database)
 
@@ -134,6 +134,8 @@ class MainWindow(QObject):
         self.timer_equalizer.timeout.connect(self.equalizerCurves)
         self.timer_equalizer.start(time_to_send_audio)
 
+        self.timer_find_comp = QTimer()
+        self.timer_find_comp.timeout.connect(self.comp_find)
 
 
 
@@ -141,6 +143,34 @@ class MainWindow(QObject):
 
 
 
+
+    def comp_find(self):
+        global open_comport_troggle,comp_find_count,ser,comport_name,comp_find_process
+        serial_ports_list = [p.device for p in list_ports.comports()]
+        comp_find_process = True
+        if ser:
+            ser.close()
+
+        open_comport_troggle = False
+        try:
+            ser = serial.Serial(serial_ports_list[comp_find_count], 9600, timeout=0)
+            time.sleep(3)
+            for i in range(0, 1000):
+                if (str(ser.readline())).find("tfk") != -1:
+                    comport_name = serial_ports_list[comp_find_count]
+                    open_comport_troggle = True
+
+        except (OSError, serial.SerialException):
+            pass
+
+        comp_find_count+=1
+        if comp_find_count == len(serial_ports_list) or open_comport_troggle == True:
+            comp_find_count = 0
+            self.timer_find_comp.stop()
+            comp_find_process = False
+
+        # ser_find.close()
+        # ser = serial.Serial(comport_name, 9600, timeout=0)
 
     def screenInfo(self):
         screenColors = pixel_color_at(*win32gui.GetCursorPos())
@@ -199,6 +229,19 @@ class MainWindow(QObject):
     def troggleEqualizer(self,troggle):
         global coef_frequence, troggle_equalizer
         troggle_equalizer = troggle
+
+    @Slot(result=bool)
+    def proccesCompFind(self):
+        global comp_find_process
+        return comp_find_process
+
+    @Slot()
+    def startProccesCompFind(self):
+        global comp_find_process
+        comp_find_process = True
+        self.comp_find()
+        self.timer_find_comp.start(10000)
+
 
 
 
@@ -361,7 +404,7 @@ class MainWindow(QObject):
     def getNewId(self, value):
         global current_id
         current_id = int(value.replace("id:",""))
-        print(serial_ports.serial_ports())
+
 
     @Slot(result=str)
     def callId(self):
@@ -370,8 +413,9 @@ class MainWindow(QObject):
 
     @Slot(str)
     def getNewCompPort(self, value):
-        global comport_name,ser,open_comport_troggle
-        ser.close()
+        global comport_name,ser,open_comport_troggle,comport_name
+        if ser:
+            ser.close()
         try:
             ser = serial.Serial(value, 9600, timeout=0)
             open_comport_troggle = False
@@ -382,7 +426,8 @@ class MainWindow(QObject):
                     print(str(ser.readline()))
                     open_comport_troggle = True
 
-
+            if open_comport_troggle == True:
+                comport_name = value
 
         except (OSError, serial.SerialException):
             open_comport_troggle = False

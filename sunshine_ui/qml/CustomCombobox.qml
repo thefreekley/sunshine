@@ -17,6 +17,10 @@ Item {
 
  }
 
+ function update(){
+     equipmentList.currentIndex = equipmentList.find(root.selectText)
+ }
+
 FontLoader {
         id: bebasFont1
         source: "../font/BebasNeue Regular.ttf"
