@@ -11,22 +11,17 @@ import time
 import sqlite3
 import serial
 from serial.tools import list_ports
-import math
 import win32gui
-import serial_ports
+
 
 comport_name = "COM5"
 open_comport_troggle = False
-list_id = [1,0]
+list_id = []
 last_id = 1
 last_index_input = 3
 last_input_name = ""
-
-try:
-    audio_input = AmplitudeLevel(last_index_input)
-    open_audio_troggle = True
-except:
-    open_audio_troggle = False
+troggle_equalizer = True
+tie_device = False
 
 
 coef_frequence = [0]*7
@@ -34,18 +29,46 @@ coef_frequence = [0]*7
 conn = sqlite3.connect("database_sunshine.db")
 cursor = conn.cursor()
 
-try:
-    ser = serial.Serial(comport_name, 9600, timeout=0)
-    open_comport_troggle = True
-except:
-    open_comport_troggle = False
+cursor.execute("SELECT * FROM info")
+info_database = cursor.fetchall()
 
-delta_time = 0
+
+cursor.execute("SELECT * FROM last_data")
+last_info = cursor.fetchall()
+
+for i in info_database:
+    list_id.append(i[0])
+
+
 def boolint(boolean):
     return 1 if boolean else 0
 
 def intbool(integer):
     return True if integer==1 else False
+
+last_id = last_info[0][0]
+comport_name = last_info[0][1]
+last_index_input = last_info[0][2]
+troggle_equalizer = intbool(last_info[0][3])
+tie_device = intbool(last_info[0][4])
+
+
+
+try:
+    audio_input = AmplitudeLevel(last_index_input)
+    open_audio_troggle = True
+except:
+    open_audio_troggle = False
+
+try:
+    ser = serial.Serial(comport_name, 9600, timeout=0)
+    open_comport_troggle = True
+except:
+    open_comport_troggle = False
+    ser = False
+
+delta_time = 0
+
 
 def mapping(num,max_cur,max_new): #start - 0
     coef = max_new/max_cur
@@ -61,8 +84,6 @@ def pixel_color_at(x, y):
     # (r, g, b)
     return (c & 0xff), ((c >> 8) & 0xff), ((c >> 16) & 0xff)
 
-cursor.execute("SELECT * FROM info")
-info_database = cursor.fetchall()
 
 amplituda = 0
 troggle_equalizer = True
@@ -70,62 +91,63 @@ troggle_equalizer = True
 string_time_to_sleep = ""
 current_day = 0
 progress_percent = 0
-tie_device = False
 time_to_send_audio = 20
 in_max = 1000000
 comp_find_count = 0
 comp_find_process = False
 
-print(info_database)
+info = list()
 
-if len(info_database) == 0:
+def update_info(index):
+    global info
+    info.append({
+        'id' : info_database[index][0],
+        'wand_troggle' : intbool(info_database[index][1]),
+        'music_troggle' : intbool(info_database[index][2]),
+        'off_troggle' : intbool(info_database[index][3]),
+        'screen_troggle' : intbool(info_database[index][4]),
+        'paint_troggle' : intbool(info_database[index][5]),
+        'sleep_from' : [info_database[0][6], info_database[index][7]],
+        'sleep_to' : [info_database[0][8], info_database[index][9]],
+        'value_light' : info_database[index][10],
+        'value_laud' : info_database[index][11],
+        'music_mode' : info_database[index][12],
+        'light_mode' : info_database[index][13],
+        'color_1' : info_database[index][14],
+        'color_2' : info_database[index][15]
+    })
 
-    current_id = 0
+if len(info_database)==0:
+    tie_device = True
 
-    color_1 = "#ff0100"
-    color_2 = "#c60100"
+for i in range(len(info_database)):
+    update_info(i)
 
-    sleep_from = [0]*2
-    sleep_to = [0]*2
+def get_info(id,property):
+    for item in info:
+        if item.get('id') == id:
+            return item.get(property)
 
-    sleep_from = [22,33]
-    sleep_to = [21,18]
+def set_info(id,property,value):
 
-    value_light = 50
-    value_laud = 10
+    for item in info:
 
-    music_mode = 2
-    light_mode = 1
+        if item.get('id') == id:
+            item.update({property:value})
 
-    wand_troggle = True
-    music_troggle = False
-    off_troggle = False
-    screen_troggle = False
-    paint_troggle = False
-else:
-    current_id = info_database[0][0]
-    wand_troggle = intbool(info_database[0][1])
-    music_troggle = intbool(info_database[0][2])
-    off_troggle = intbool(info_database[0][3])
-    screen_troggle = intbool(info_database[0][4])
-    paint_troggle = intbool(info_database[0][5])
-    sleep_from =[info_database[0][6],info_database[0][7]]
-    sleep_to =[info_database[0][8],info_database[0][9]]
-    value_light = info_database[0][10]
-    value_laud = info_database[0][11]
-    music_mode = info_database[0][12]
-    light_mode = info_database[0][13]
-    color_1 = info_database[0][14]
-    color_2 = info_database[0][15]
+
+
 
 
 
 class MainWindow(QObject):
     def __init__(self):
         QObject.__init__(self)
+        global info,last_id
         self.screen_timer = QTimer()
         self.screen_timer.timeout.connect(self.screenInfo)
-        if screen_troggle:
+
+        if get_info(last_id, 'screen_troggle'):
             self.screen_timer.start(1000)
 
 
@@ -174,7 +196,7 @@ class MainWindow(QObject):
 
     def screenInfo(self):
         screenColors = pixel_color_at(*win32gui.GetCursorPos())
-        self.toController(broadcast=tie_device, id=current_id, mode=5, item=screenColors)
+        self.toController(broadcast=tie_device, id=last_id, mode=5, item=screenColors)
 
 
 
@@ -189,13 +211,13 @@ class MainWindow(QObject):
 
 
         for i in range(len(fft_out)):
-            a = int(fft_out[i]/ (270-value_laud))
+            a = int(fft_out[i]/ (270-get_info(last_id,'value_laud')))
             if a>200:
                 a =200
             coef_frequence.append(a)
 
-        if music_troggle:
-            if music_mode == 6:
+        if get_info(last_id,'music_troggle'):
+            if get_info(last_id,'music_mode') == 6:
                 byte_value = 0
                 for i in range(len(coef_frequence)-1):
                     if coef_frequence[i]/ (old_coef_frequence[i] + 0.0001)>10:
@@ -209,7 +231,7 @@ class MainWindow(QObject):
                 else:
                     a = 0
 
-                amplitude_filter = mapping(a, 6001, value_laud/2)
+                amplitude_filter = mapping(a, 6001, get_info(last_id,'value_laud')/2)
 
                 amplitude_filter = amplitude_filter **2 + 3
 
@@ -251,7 +273,7 @@ class MainWindow(QObject):
         global coef_frequence,value_laud
         new_coef_frequence = list()
         for i in coef_frequence:
-            new_coef =  i*(value_laud / 60)
+            new_coef =  i*(get_info(last_id,'value_laud') / 60)
             new_coef_frequence.append( 200 if new_coef>200 else new_coef )
 
 
@@ -270,7 +292,7 @@ class MainWindow(QObject):
                 str_serial_ports+=i
                 str_serial_ports+="-"
 
-        if(str_serial_ports.find(comport_name) == -1):
+        if(str_serial_ports.find(comport_name) == -1 and comport_name!="..."):
             temp_str =  str_serial_ports
             str_serial_ports += ""
             str_serial_ports = temp_str + comport_name + "-"
@@ -278,12 +300,14 @@ class MainWindow(QObject):
         return str_serial_ports[0:-1]
 
     def doWork(self):
-        global sleep_to, sleep_from, progress_percent,string_time_to_sleep,current_day,delta_time
+        global  progress_percent,string_time_to_sleep,current_day,delta_time
 
         curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
         current_second = (int(curent_time[0]))*60*60 + (int(curent_time[1]))*60 + (int(curent_time[2]))
 
 
+        sleep_from = get_info(last_id,'sleep_from')
+        sleep_to = get_info(last_id,'sleep_to')
 
         from_in_seconds = sleep_from[0]*60*60 + sleep_from[1]*60
         to_in_seconds = sleep_to[0]*60*60 + sleep_to[1]*60
@@ -306,7 +330,7 @@ class MainWindow(QObject):
         else:
             progress_percent = 1
             string_time_to_sleep = "Finish"
-            # self.toController(broadcast=tie_device, id=current_id, mode=3, item=[0])
+            # self.toController(broadcast=tie_device, id=last_id, mode=3, item=[0])
             # time.sleep(0.05)
 
 
@@ -320,8 +344,7 @@ class MainWindow(QObject):
 
     @Slot(result=int)
     def lightModeNumber(self):
-        global light_mode
-        return light_mode
+        return get_info(last_id,'light_mode')
 
     @Slot(result=str)
     def callCompName(self):
@@ -340,10 +363,9 @@ class MainWindow(QObject):
 
     @Slot(result=str)
     def callIdListName(self):
-        global list_id
         str_list_id = ""
-        for i in list_id:
-            str_list_id+= "id:" + str(i) + "-"
+        for item in info:
+            str_list_id+= "id:" + str(item.get("id")) + "-"
         str_list_id = str_list_id[:-1]
 
         return str_list_id
@@ -373,43 +395,73 @@ class MainWindow(QObject):
 
     @Slot(result=int)
     def musicModeNumber(self):
-        global music_mode
-        return music_mode
+        return get_info(last_id,'music_mode')
+
+    @Slot(int)
+    def removeDeviceId(self,value):
+        global last_id,tie_device
+        for item in info:
+
+            if item.get("id") == value:
+                if len(info) - 1 == 0:
+                    temp_item = item.copy()
+                    temp_item.update(id = 0)
+                    info.append(temp_item)
+                    tie_device = True
+
+                info.remove(item)
+
+        if value == last_id:
+            last_id = info[0].get("id")
+
+
+
+
+    @Slot(int)
+    def addDeviceId(self, value):
+
+        for item in info:
+            if item.get("id") == last_id:
+                temp_item = item.copy()
+                temp_item.update(id = value)
+                info.append(temp_item)
+
+
+
 
     @Slot(str,result=bool)
     def modeNumber(self,item):
-        if item== "wand": return wand_troggle
-        elif item == "music": return music_troggle
-        elif item == "off":return off_troggle
-        elif item == "screen":return screen_troggle
-        elif item == "paint": return paint_troggle
+        if item == "wand": return get_info(last_id, 'wand_troggle')
+        elif item == "music": return get_info(last_id,'music_troggle')
+        elif item == "off":return get_info(last_id,'off_troggle')
+        elif item == "screen":return get_info(last_id, 'screen_troggle')
+        elif item == "paint": return get_info(last_id,'paint_troggle')
 
 
     @Slot(result=int)
     def lightSliderValue(self):
-        global value_light
-        return value_light
+        return get_info(last_id,'value_light')
 
 
 
     @Slot(int)
     def getSliderLightValue(self, value):
-        global value_light,off_troggle
-        value_light = value
-        if not off_troggle:
-
-            self.toController(broadcast=tie_device, id=current_id, mode=4, item=[value_light])
+        set_info(last_id, 'value_light', value)
+        if not get_info(last_id,'off_troggle'):
+            self.toController(broadcast=tie_device, id=last_id, mode=4, item=[get_info(last_id,'value_light')])
 
     @Slot(str)
     def getNewId(self, value):
-        global current_id
-        current_id = int(value.replace("id:",""))
+        global last_id
+        last_id = int(value.replace("id:",""))
+
+
 
 
     @Slot(result=str)
     def callId(self):
-        global current_id
-        return "id:" + str(current_id)
+        global last_id
+        return "id:" + str(last_id)
 
     @Slot(str)
     def getNewCompPort(self, value):
@@ -423,7 +475,7 @@ class MainWindow(QObject):
 
             for i in range(0,1000):
                 if (str(ser.readline())).find("tfk") != -1:
-                    print(str(ser.readline()))
+
                     open_comport_troggle = True
 
             if open_comport_troggle == True:
@@ -455,8 +507,7 @@ class MainWindow(QObject):
 
     @Slot(result=int)
     def loudSliderValue(self):
-        global value_laud
-        return value_laud
+        return get_info(last_id,'value_laud')
 
     @Slot(result=bool)
     def callErrComport(self):
@@ -465,47 +516,44 @@ class MainWindow(QObject):
 
     @Slot(int)
     def getSliderLoundValue(self, value):
-        global value_laud
-        value_laud = value
+        set_info(last_id, 'value_laud', value)
+
 
 
     @Slot(result=str)
     def colorOnePallete(self):
-        global color_1
-        return color_1
+        return get_info(last_id,'color_1')
 
     @Slot(result=str)
     def colorTwoPallete(self):
-        global color_2
-        return color_2
+        return get_info(last_id,'color_2')
 
 
     @Slot(str,int)
     def getCollorPallet(self, value, index):
-        global color_1,color_2,paint_troggle
         if index==1: color_1 = value
         elif index == 2: color_2 = value
-        if paint_troggle:
+        if get_info(last_id,'paint_troggle'):
             items = list()
-            items.append(ImageColor.getcolor(color_1, "RGB")[0])
-            items.append(ImageColor.getcolor(color_1, "RGB")[1])
-            items.append(ImageColor.getcolor(color_1, "RGB")[2])
+            items.append(ImageColor.getcolor(get_info(last_id,'color_1'), "RGB")[0])
+            items.append(ImageColor.getcolor(get_info(last_id,'color_1'), "RGB")[1])
+            items.append(ImageColor.getcolor(get_info(last_id,'color_1'), "RGB")[2])
 
-            items.append(ImageColor.getcolor(color_2, "RGB")[0])
-            items.append(ImageColor.getcolor(color_2, "RGB")[1])
-            items.append(ImageColor.getcolor(color_2, "RGB")[2])
+            items.append(ImageColor.getcolor(get_info(last_id,'color_2'), "RGB")[0])
+            items.append(ImageColor.getcolor(get_info(last_id,'color_2'), "RGB")[1])
+            items.append(ImageColor.getcolor(get_info(last_id,'color_2'), "RGB")[2])
 
-            self.toController(broadcast=tie_device,id=current_id,mode=7,item=items)
+            self.toController(broadcast=tie_device,id=last_id,mode=7,item=items)
 
 
     @Slot(result=str)
     def timeToSleep(self):
-        global sleep_to
+        sleep_to = get_info(last_id,'sleep_to')
         return str(sleep_to[0]) + ("0" if sleep_to[0]==0 else "") + ":" + str(sleep_to[1]) + ("0" if sleep_to[1]==0 else "")
 
     @Slot(result=str)
     def timeFromSleep(self):
-        global sleep_from
+        sleep_from = get_info(last_id,'sleep_from')
         return str(sleep_from[0]) + ("0" if sleep_from[0]==0 else "") + ":" + str(sleep_from[1]) + ("0" if sleep_from[1]==0 else "")
 
     @Slot(result=str)
@@ -515,7 +563,6 @@ class MainWindow(QObject):
     @Slot(result=str)
     def remainTime(self):
         global string_time_to_sleep,delta_time
-
         return string_time_to_sleep
 
     @Slot(result=float)
@@ -535,14 +582,12 @@ class MainWindow(QObject):
 
     @Slot(str)
     def getTimeFromToSleep(self, value):
-        global sleep_from, sleep_to,current_day
+        global current_day
         split_value = value.split("-")
 
-        sleep_from[0] = int(split_value[0].split(":")[0])
-        sleep_from[1] = int(split_value[0].split(":")[1])
+        set_info(last_id, 'sleep_from', [int(split_value[0].split(":")[0]),int(split_value[0].split(":")[1])])
+        set_info(last_id, 'sleep_to', [int(split_value[1].split(":")[0]), int(split_value[1].split(":")[1]) ])
 
-        sleep_to[0] = int(split_value[1].split(":")[0])
-        sleep_to[1] = int(split_value[1].split(":")[1])
 
         current_day =int(datetime.date.today().day)
 
@@ -556,27 +601,25 @@ class MainWindow(QObject):
 
     @Slot(bool, bool, bool, bool, bool)
     def getModeTroggle(self, troggleWand, troggleMusic, troggleOff, troggleScreen, trooglePaint):
-        global wand_troggle,music_troggle,off_troggle,screen_troggle,paint_troggle,music_mode,light_mode,color_1,color_2
 
-        if off_troggle is not troggleOff:
-            self.toController(broadcast=tie_device, id=current_id, mode=4, item=[0 if troggleOff else value_light])
+        if get_info(last_id,'off_troggle') is not troggleOff:
+            self.toController(broadcast=tie_device, id=last_id, mode=4, item=[0 if troggleOff else get_info(last_id,'value_light')])
             time.sleep(0.05)
 
-        if (trooglePaint is not paint_troggle and wand_troggle) or (wand_troggle is not troggleWand and paint_troggle):
-
-            self.toController(broadcast=tie_device, id=current_id, mode=2, item=[5])
+        if (trooglePaint is not get_info(last_id,'paint_troggle') and get_info(last_id, 'wand_troggle')) or (get_info(last_id, 'wand_troggle') is not troggleWand and get_info(last_id,'paint_troggle')):
+            self.toController(broadcast=tie_device, id=last_id, mode=2, item=[5])
             time.sleep(0.05)
 
 
-        wand_troggle = troggleWand
-        music_troggle = troggleMusic
-        off_troggle = troggleOff
-        screen_troggle = troggleScreen
-        paint_troggle = trooglePaint
+        set_info(last_id,'wand_troggle',troggleWand)
+        set_info(last_id, 'music_troggle', troggleMusic)
+        set_info(last_id, 'off_troggle', troggleOff)
+        set_info(last_id, 'screen_troggle', troggleScreen)
+        set_info(last_id, 'paint_troggle', trooglePaint)
 
-        print(screen_troggle)
 
-        if screen_troggle:
+
+        if get_info(last_id, 'screen_troggle'):
             self.screen_timer.start(1000)
         else:
             self.screen_timer.stop()
@@ -586,31 +629,29 @@ class MainWindow(QObject):
 
     @Slot(bool, bool, bool, bool, bool, bool, bool, bool)
     def getMusicTroggle(self, musicTroggle1, musicTroggle2, musicTroggle3, musicTroggle4, musicTroggle5,musicTroggle6,musicTroggle7,musicTroggle8):
-        global music_mode
 
-        if music_troggle:
-            if musicTroggle1: music_mode=1
-            elif musicTroggle2: music_mode = 2
-            elif musicTroggle3:music_mode = 3
-            elif musicTroggle4: music_mode = 4
-            elif musicTroggle5:music_mode = 5
-            elif musicTroggle6: music_mode = 6
-            elif musicTroggle7:music_mode = 7
-            elif musicTroggle8: music_mode = 8
+        if get_info(last_id,'music_troggle'):
+            if musicTroggle1: set_info(last_id,'music_mode',1)
+            elif musicTroggle2: set_info(last_id,'music_mode',2)
+            elif musicTroggle3:set_info(last_id,'music_mode',3)
+            elif musicTroggle4: set_info(last_id,'music_mode',4)
+            elif musicTroggle5:set_info(last_id,'music_mode',5)
+            elif musicTroggle6: set_info(last_id,'music_mode',6)
+            elif musicTroggle7:set_info(last_id,'music_mode',7)
+            elif musicTroggle8:set_info(last_id,'music_mode',8)
             time.sleep(0.5)
-            self.toController(broadcast=tie_device, id=current_id, mode=1, item=[music_mode])
+            self.toController(broadcast=tie_device, id=last_id, mode=1, item=[get_info(last_id,'music_mode')])
             time.sleep(0.5)
 
     @Slot(bool, bool, bool, bool)
     def getLightTroggle(self, lightTroggle1, lightTroggle2, lightTroggle3, lightTroggle4):
-        global light_mode
-        if wand_troggle:
-            if lightTroggle1: light_mode =1
-            elif lightTroggle2: light_mode = 2
-            elif lightTroggle3: light_mode = 3
-            elif lightTroggle4:light_mode = 4
-            if not paint_troggle:
-                self.toController(broadcast=tie_device, id=current_id, mode=2, item=[light_mode])
+        if get_info(last_id, 'wand_troggle'):
+            if lightTroggle1: set_info(last_id,'light_mode',1)
+            elif lightTroggle2: set_info(last_id,'light_mode',2)
+            elif lightTroggle3: set_info(last_id,'light_mode',3)
+            elif lightTroggle4: set_info(last_id,'light_mode',4)
+            if not get_info(last_id,'paint_troggle'):
+                self.toController(broadcast=tie_device, id=last_id, mode=2, item=[get_info(last_id,'light_mode')])
 
 
     def toController(self,broadcast, id, mode, item):
@@ -637,12 +678,21 @@ class MainWindow(QObject):
 
 
 def save():
-    list_save = [current_id, boolint(wand_troggle), boolint(music_troggle), boolint(off_troggle), boolint(screen_troggle), boolint(paint_troggle),
-                 int(sleep_from[0]),int(sleep_from[1]),int(sleep_to[0]),int(sleep_to[1]),value_light,value_laud,music_mode,light_mode,color_1,color_2
-    ]
-    cursor.execute("DELETE FROM info WHERE id = ?",[current_id])
-    print(list_save)
-    cursor.execute("INSERT INTO info  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", list_save)
+    cursor.execute("DELETE FROM info")
+    for item in info:
+        list_save = [item.get('id'), boolint(item.get('info').get('wand_troggle')),
+                     boolint(item.get('info').get('music_troggle')),boolint(item.get('info').get('off_troggle')),
+                     boolint(get_info(last_id, 'screen_troggle')), boolint(get_info(last_id, 'paint_troggle')),
+                     get_info(last_id, 'sleep_from')[0], get_info(last_id, 'sleep_from')[1],
+                     get_info(last_id, 'sleep_to')[0], get_info(last_id, 'sleep_to')[1],get_info(last_id, 'value_light'),
+                     get_info(last_id, 'value_laud'),get_info(last_id, 'music_mode') , get_info(last_id, 'light_mode'),
+                     get_info(last_id, 'color_1'),get_info(last_id, 'color_2')
+                     ]
+        cursor.execute("INSERT INTO info  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", list_save)
+
+    cursor.execute("DELETE FROM last_data")
+    cursor.execute("INSERT INTO last_data  VALUES(?,?,?,?,?)", [last_id,comport_name,last_index_input,boolint(troggle_equalizer),tie_device])
+
     conn.commit()
 
 

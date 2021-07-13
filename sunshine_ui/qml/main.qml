@@ -23,6 +23,69 @@ Window {
             setAudioInput()
         }
 
+     function updateAll(){
+         wandLight.troggle = backend.modeNumber("wand")
+         iconOff.troggle = backend.modeNumber("off")
+         iconMusic.troggle = backend.modeNumber("music")
+         screenLight.troggle = backend.modeNumber("screen")
+         painLight.troggle = backend.modeNumber("paint")
+
+         if(backend.modeNumber("music")){
+         smallButtonMusic1.troggle = (backend.musicModeNumber() == 1) ? true : false
+        smallButtonMusic2.troggle = (backend.musicModeNumber() == 2) ? true : false
+        smallButtonMusic3.troggle = (backend.musicModeNumber() == 3) ? true : false
+        smallButtonMusic4.troggle = (backend.musicModeNumber() == 4) ? true : false
+        smallButtonMusic5.troggle = (backend.musicModeNumber() == 5) ? true : false
+        smallButtonMusic6.troggle = (backend.musicModeNumber() == 6) ? true : false
+        smallButtonMusic7.troggle = (backend.musicModeNumber() == 7) ? true : false
+        smallButtonMusic8.troggle = (backend.musicModeNumber() == 8) ? true : false
+         lightButton1.troggle = false
+         lightButton2.troggle = false
+         lightButton3.troggle = false
+         lightButton4.troggle = false
+         }
+
+        if(backend.modeNumber("wand")){
+            lightButton1.troggle =  (backend.lightModeNumber() == 1) ? true : false
+            lightButton2.troggle =  (backend.lightModeNumber() == 2) ? true : false
+            lightButton3.troggle =  (backend.lightModeNumber() == 3) ? true : false
+            lightButton4.troggle =  (backend.lightModeNumber() == 4) ? true : false
+            smallButtonMusic1.troggle = false
+            smallButtonMusic2.troggle = false
+            smallButtonMusic3.troggle = false
+            smallButtonMusic4.troggle = false
+            smallButtonMusic5.troggle = false
+            smallButtonMusic6.troggle = false
+            smallButtonMusic7.troggle = false
+            smallButtonMusic8.troggle = false
+        }
+        if(backend.modeNumber("paint")){
+            lightButton1.troggle = false
+            lightButton2.troggle = false
+            lightButton3.troggle = false
+            lightButton4.troggle = false
+        }
+        if(backend.modeNumber("screen")){
+            lightButton1.troggle = false
+            lightButton2.troggle = false
+            lightButton3.troggle = false
+            lightButton4.troggle = false
+            smallButtonMusic1.troggle = false
+            smallButtonMusic2.troggle = false
+            smallButtonMusic3.troggle = false
+            smallButtonMusic4.troggle = false
+            smallButtonMusic5.troggle = false
+            smallButtonMusic6.troggle = false
+            smallButtonMusic7.troggle = false
+            smallButtonMusic8.troggle = false
+        }
+
+
+        controlLight.value = backend.lightSliderValue()
+        controlMusic.value = loudSliderValue()
+
+     }
+
     function setSerialPort(){
         var serialPortStr = backend.callSerialPortList();
         var serialPortListSplit = (serialPortStr).split("-")
@@ -226,6 +289,7 @@ Window {
 
                 }
 
+
                 RoundButtonImg  {
                     id: iconOff
                     width: 50
@@ -247,6 +311,7 @@ Window {
                     y_value: 110
 
                 }
+
 
 
                 RoundButtonImg  {
@@ -298,6 +363,7 @@ Window {
                             if(treeButton.troggle==false){
                                 animationLoader(true,500)
                                 label.text = backend.callId()
+                                updateAll()
                             }
                         }
                         Component.onCompleted: idCombobox.selectText = backend.callLastIdName()
@@ -416,7 +482,11 @@ Window {
                                     }
                                 }
 
-                               if(sameId == 0 && idInput.text.toString()!="") idCombobox.new_model.append({ text: "id:" + idInput.text.toString()} )
+                               if(sameId == 0 && idInput.text.toString()!="") {
+                                   idCombobox.new_model.append({ text: "id:" + idInput.text.toString()} )
+                                    backend.addDeviceId(parseInt(idInput.text,10))
+                               }
+
                                 idInput.text = ""
                             }
 
@@ -459,6 +529,7 @@ Window {
                                     console.log(item,idInput.text.toString())
                                     if(item == ("id:" + idInput.text.toString())){
                                         idCombobox.new_model.remove(i,1)
+                                        backend.removeDeviceId(idInput.text.parseInt())
                                     }
                                 }
                                 idInput.text = ""
@@ -1216,7 +1287,7 @@ Window {
 
                         Timer {
                               id: timerFindComp
-                              interval: 1000; running: true; repeat: false
+                              interval: 1000; running: false; repeat: false
                               onTriggered: {
 
                                   if(backend.proccesCompFind() == true){
