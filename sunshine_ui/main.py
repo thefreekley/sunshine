@@ -257,6 +257,7 @@ class MainWindow(QObject):
         global comp_find_process
         return comp_find_process
 
+
     @Slot()
     def startProccesCompFind(self):
         global comp_find_process
@@ -264,12 +265,94 @@ class MainWindow(QObject):
         self.comp_find()
         self.timer_find_comp.start(10000)
 
+    @Slot(str)
+    def cycleSleepMode(self,string):
+
+        curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
+
+
+        split_time = string.split(" ")
+        time_from = split_time[0].split(":")
+        time_to = split_time[1].split(":")
+
+        items = list()
+        items.append(int(curent_time[0]))
+        items.append(int(curent_time[1]))
+
+        items.append(int(time_from[0]))
+        items.append(int(time_from[1]))
+
+        items.append(int(time_to[0]))
+        items.append(int(time_to[1]))
+
+
+
+
+        self.toController(broadcast=tie_device, id=last_id, mode=6, item=items)
+        time.sleep(0.05)
+
+
+    @Slot(str)
+    def lightSleepMode(self, string):
+        curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
+
+        split_time = string.split(" ")
+        time_from = split_time[0].split(":")
+
+        items = list()
+        items.append(int(curent_time[0]))
+        items.append(int(curent_time[1]))
+
+        items.append(int(time_from[0]))
+        items.append(int(time_from[1]))
+
+        items.append(66)
+        items.append(66)
+
+        self.toController(broadcast=tie_device, id=last_id, mode=6, item=items)
+        time.sleep(0.05)
+
+    @Slot(str)
+    def offSleepMode(self, string):
+        curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
+
+        split_time = string.split(" ")
+        time_from = split_time[0].split(":")
+
+        items = list()
+        items.append(int(curent_time[0]))
+        items.append(int(curent_time[1]))
+
+        items.append(66)
+        items.append(66)
+
+        items.append(int(time_from[0]))
+        items.append(int(time_from[1]))
+
+        self.toController(broadcast=tie_device, id=last_id, mode=6, item=items)
+        time.sleep(0.05)
+
+    @Slot()
+    def wasteSleepMode(self):
+        curent_time = (str(datetime.datetime.now(tz=None))[11:19]).split(":")
+
+        items = list()
+        items.append(int(curent_time[0]))
+        items.append(int(curent_time[1]))
+
+        items.append(66)
+        items.append(66)
+
+        items.append(66)
+        items.append(66)
+
+        self.toController(broadcast=tie_device, id=last_id, mode=6, item=items)
+        time.sleep(0.05)
 
 
 
     @Slot(int,result=int)
     def equalizerLine(self,index):
-
         global coef_frequence,value_laud
         new_coef_frequence = list()
         for i in coef_frequence:
@@ -531,8 +614,8 @@ class MainWindow(QObject):
 
     @Slot(str,int)
     def getCollorPallet(self, value, index):
-        if index==1: color_1 = value
-        elif index == 2: color_2 = value
+        if index==1:  set_info(last_id, 'color_1', value)
+        elif index == 2: set_info(last_id, 'color_2', value)
         if get_info(last_id,'paint_troggle'):
             items = list()
             items.append(ImageColor.getcolor(get_info(last_id,'color_1'), "RGB")[0])
@@ -607,6 +690,17 @@ class MainWindow(QObject):
             time.sleep(0.05)
 
         if (trooglePaint is not get_info(last_id,'paint_troggle') and get_info(last_id, 'wand_troggle')) or (get_info(last_id, 'wand_troggle') is not troggleWand and get_info(last_id,'paint_troggle')):
+            items = list()
+            items.append(ImageColor.getcolor(get_info(last_id, 'color_1'), "RGB")[0])
+            items.append(ImageColor.getcolor(get_info(last_id, 'color_1'), "RGB")[1])
+            items.append(ImageColor.getcolor(get_info(last_id, 'color_1'), "RGB")[2])
+
+            items.append(ImageColor.getcolor(get_info(last_id, 'color_2'), "RGB")[0])
+            items.append(ImageColor.getcolor(get_info(last_id, 'color_2'), "RGB")[1])
+            items.append(ImageColor.getcolor(get_info(last_id, 'color_2'), "RGB")[2])
+            self.toController(broadcast=tie_device, id=last_id, mode=7, item=items)
+            time.sleep(0.05)
+
             self.toController(broadcast=tie_device, id=last_id, mode=2, item=[5])
             time.sleep(0.05)
 
@@ -680,18 +774,18 @@ class MainWindow(QObject):
 def save():
     cursor.execute("DELETE FROM info")
     for item in info:
-        list_save = [item.get('id'), boolint(item.get('info').get('wand_troggle')),
-                     boolint(item.get('info').get('music_troggle')),boolint(item.get('info').get('off_troggle')),
-                     boolint(get_info(last_id, 'screen_troggle')), boolint(get_info(last_id, 'paint_troggle')),
-                     get_info(last_id, 'sleep_from')[0], get_info(last_id, 'sleep_from')[1],
-                     get_info(last_id, 'sleep_to')[0], get_info(last_id, 'sleep_to')[1],get_info(last_id, 'value_light'),
-                     get_info(last_id, 'value_laud'),get_info(last_id, 'music_mode') , get_info(last_id, 'light_mode'),
-                     get_info(last_id, 'color_1'),get_info(last_id, 'color_2')
+        list_save = [item.get('id'), boolint(item.get('wand_troggle')),
+                     boolint(item.get('music_troggle')),boolint(item.get('off_troggle')),
+                     boolint(item.get('screen_troggle')), boolint(item.get('paint_troggle')),
+                     item.get('sleep_from')[0], item.get('sleep_from')[1],
+                     item.get('sleep_to')[0], item.get('sleep_to')[1],item.get('value_light'),
+                     item.get('value_laud'),item.get('music_mode') , item.get('light_mode'),
+                     item.get('color_1'),item.get('color_2')
                      ]
         cursor.execute("INSERT INTO info  VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", list_save)
 
     cursor.execute("DELETE FROM last_data")
-    cursor.execute("INSERT INTO last_data  VALUES(?,?,?,?,?)", [last_id,comport_name,last_index_input,boolint(troggle_equalizer),tie_device])
+    cursor.execute("INSERT INTO last_data  VALUES(?,?,?,?,?)", [last_id,comport_name,last_index_input,boolint(troggle_equalizer),boolint(tie_device)])
 
     conn.commit()
 

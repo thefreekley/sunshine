@@ -53,8 +53,8 @@ class AmplitudeLevel(object):
         input_device = []
         for i in range(self.pa.get_device_count()):
             info = self.pa.get_device_info_by_index(i)
-            if info['maxInputChannels']!=0 and info['maxOutputChannels']==0 and info['hostApi']==0:
-                input_device.append(info)
+            # if info['maxInputChannels']!=0 and info['maxOutputChannels']==0 and info['hostApi']==0:
+            input_device.append(info)
 
 
         return input_device

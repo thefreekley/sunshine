@@ -82,7 +82,16 @@ Window {
 
 
         controlLight.value = backend.lightSliderValue()
-        controlMusic.value = loudSliderValue()
+        controlMusic.value = backend.loudSliderValue()
+
+        textFieldFrom.text = backend.timeFromSleep()
+        textFieldTo.text = backend.timeToSleep()
+
+        colorDialog1.color =  backend.colorOnePallete()
+        colorDialog2.color =  backend.colorTwoPallete()
+        gradientPaintTop.restart()
+        gradientPaintBottom.restart()
+        gradientPaintMiddle.restart()
 
      }
 
@@ -825,45 +834,6 @@ Window {
                     anchors.bottomMargin: 8
                     anchors.rightMargin: 8
 
-                    ProgressBar {
-                        id: control
-
-                        width: parent.width - 20
-                        height: 12
-
-                        Timer {
-                            id: timerToSleep
-                            interval: 1000;
-                            running: true;
-                            repeat: true
-                            onTriggered: {
-
-                                timeToSleepRemainTime.text = backend.remainTime()
-                                control.value = backend.progressBarValue()
-
-                            }
-                        }
-
-                        background: Rectangle {
-                            implicitWidth: parent.width - 20
-                            implicitHeight: 12
-                            color: "white"
-                            radius: 6
-                        }
-
-                        contentItem: Item {
-                            implicitWidth: parent.width - 20
-                            implicitHeight: 12
-
-                            Rectangle {
-                                width: control.visualPosition * parent.width
-                                height: parent.height
-                                radius: 6
-                                color: "#ff6860"
-                            }
-                        }
-                    }
-
 
 
 
@@ -872,134 +842,11 @@ Window {
                         source: "../font/BebasNeue Regular.ttf"
                     }
 
-                    Label {
-                        id: timeToSleep
-                        x: 0
-                        y: 18
-                        font.family: bebasFont1.name
-                        font.pointSize: 13
-                        width: 79
-                        height: 69
-                        color: "white"
-                        text: qsTr("time to sleep:")
-                    }
-                    Label {
-                        id: timeToSleepRemainTime
-                        x: 81
-                        y: 18
-                        width: 79
-                        height: 69
-
-                        color: "#ff6860"
-                        text: backend.remainTime()
-                        font.pointSize: 13
-                        font.family: bebasFont1.name
-                    }
-
-                    Rectangle {
-                        id: sleepButton
-                        property string timeToSleepValue: "-"
-                        x: 0
-                        y: 46
-                        width: 113
-                        height: 30
-                        radius: 15
-                        color: "#00d4e0"
-
-                        //                        MouseArea{
-                        //                            anchors.fill: parent
-                        //                            onClicked:{
-                        //                                sleepButton.timeToSleepValue = qsTr(textFieldFrom.text + "-" + textFieldTo.text)
-
-                        //                                backend.getTimeFromToSleep(sleepButton.timeToSleepValue)
-                        //                            }
-                        //                        }
-
-                        Label {
-                            id: sleepAll
-                            font.family: bebasFont1.name
-                            font.pointSize: 13
-                            color: "white"
-                            text: qsTr("SLEEP")
-                            anchors.centerIn: parent
-                            property string duringTime: ""
-                            MouseArea{
-                                anchors.fill: parent
-                                onClicked:{
-                                    textFieldFrom.cursorVisible = false
-                                    textFieldTo.cursorVisible = false
-
-                                    var timeSplitFrom = ""
-                                    var timeSplitTo = ""
-                                    var hour = 0
-                                    var minute = 0
-
-                                    if(timeSplitFrom[0] != "" && timeSplitFrom[1] != "" && timeSplitTo[0] != "" && timeSplitTo[1] != ""){
-                                        notValid.opacity = 0
-                                        timeSplitFrom = (textFieldFrom.text).split(":")
-                                        hour = parseInt(timeSplitFrom[0])
-                                        minute = parseInt(timeSplitFrom[1])
-                                        textFieldFrom.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
-
-                                        timeSplitTo = (textFieldTo.text).split(":")
-                                        hour = parseInt(timeSplitTo[0])
-                                        minute = parseInt(timeSplitTo[1])
-
-                                        textFieldTo.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
-
-                                        sleepAll.duringTime = textFieldFrom.text + "-" + textFieldTo.text
-
-                                        backend.getTimeFromToSleep(sleepAll.duringTime)
-
-                                    }
-
-                                    timeSplitFrom = (textFieldFrom.text).split(":")
-                                    if (timeSplitFrom[0] == "" || timeSplitFrom[1] == ""){
-                                        notValid.opacity = 1
-                                        textFieldFrom.text = backend.currentTime()
-                                        timeSplitFrom = (textFieldFrom.text).split(":")
-                                        hour = parseInt(timeSplitFrom[0])
-                                        minute = parseInt(timeSplitFrom[1])
-
-                                        textFieldFrom.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
-                                    }
-
-
-
-
-                                    timeSplitTo = (textFieldTo.text).split(":")
-                                    if (timeSplitTo[0] == "" || timeSplitTo[1] == ""){
-                                        notValid.opacity = 1
-                                        textFieldTo.text = backend.currentTime()
-                                        if(minute>54){
-                                            minute = 0
-                                            if(hour == 23)hour = 0
-                                            else hour++
-                                        }
-                                        else minute+=5
-
-
-
-                                        textFieldTo.text = ((hour<10) ? "0":"") + (hour).toString() + ":" + ((minute<10) ? "0":"") + (minute).toString()
-                                    }
-
-
-
-
-
-
-
-                                }
-                            }
-
-                        }
-                    }
-
                     Rectangle {
                         id: timeRectangle
-                        x: 126
+                        x: 147
                         y: 46
-                        width: 221
+                        width: 200
                         height: 30
                         radius: 15
                         color: "#ffd400"
@@ -1207,6 +1054,190 @@ Window {
                         anchors.leftMargin: 0
                     }
 
+                    Row {
+                        id: sleepFunction
+                        x: 0
+                        y: 46
+                        spacing: 5
+
+                        width: 146
+                        height: 30
+                        anchors.leftMargin: 5
+                        Rectangle{
+                            color: "#ffd400"
+                            id: cycleLabel
+
+                            width:30
+                            height:30
+                            radius: height/2
+                            Image {
+                               anchors.centerIn: parent
+                                x: 0
+                                y: 0
+                                width: 27
+                                height: 27
+                                source: "../images/sleep/cycle.png"
+                                fillMode: Image.PreserveAspectFit
+
+
+                            }
+                            MouseArea{
+                                anchors.fill: parent
+
+                                hoverEnabled: true
+                                onExited : {
+                                    cycleLabel.color = "#ffd400";
+                                    textFieldFrom.color = "black";
+                                    textFieldTo.color = "black"
+                                }
+                                onEntered: {
+                                    cycleLabel.color = "#e6cb05";
+                                    textFieldFrom.color = "red";
+                                    textFieldTo.color = "red"
+                                }
+
+                                onClicked:{
+                                    backend.cycleSleepMode(textFieldFrom.text + " " + textFieldTo.text)
+                                }
+                            }
+
+                        }
+
+                        Rectangle{
+                            color: "#ffd400"
+                            id: lightLabel
+                            width:30
+                            height:30
+                            radius: height/2
+
+                            Image {
+                               anchors.centerIn: parent
+                                x: 0
+                                y: 0
+                                width: 27
+                                height: 27
+                                source: "../images/sleep/light.png"
+                                fillMode: Image.PreserveAspectFit
+
+
+                            }
+                            MouseArea{
+                                anchors.fill: parent
+
+                                hoverEnabled: true
+                                onExited : {
+                                    cycleLabel.color = "#ffd400";
+                                    textFieldFrom.color = "black";
+                                }
+                                onEntered: {
+                                    cycleLabel.color = "#e6cb05";
+                                    textFieldFrom.color = "red";
+                                }
+
+                                onClicked:{
+                                     backend.lightSleepMode(textFieldFrom.text)
+                                }
+                            }
+
+                        }
+
+                        Rectangle{
+                            color: "#ffd400"
+                            id: sleepLabel
+                            width:30
+                            height:30
+                            radius: height/2
+                            Image {
+                               anchors.centerIn: parent
+                                x: 0
+                                y: 0
+                                width: 27
+                                height: 27
+                                source: "../images/sleep/moon.png"
+                                fillMode: Image.PreserveAspectFit
+
+
+                            }
+                            MouseArea{
+                                anchors.fill: parent
+
+                                hoverEnabled: true
+                                onExited : {
+                                    cycleLabel.color = "#ffd400";
+                                    textFieldFrom.color = "black";
+                                }
+                                onEntered: {
+                                    cycleLabel.color = "#e6cb05";
+                                    textFieldFrom.color = "red";
+                                }
+
+                                onClicked:{
+                                     backend.offSleepMode(textFieldFrom.text)
+                                }
+                            }
+
+                        }
+
+                        Rectangle{
+                            color: "#ffd400"
+                            id: wasteLabel
+                            width:30
+                            height:30
+                            radius: height/2
+                            Image {
+                               anchors.centerIn: parent
+                                x: 0
+                                y: 0
+                                width: 27
+                                height: 27
+                                source: "../images/sleep/waste.png"
+                                fillMode: Image.PreserveAspectFit
+
+
+                            }
+                            MouseArea{
+                                anchors.fill: parent
+
+                                hoverEnabled: true
+                                onExited : { wasteLabel.color = "#ffd400";}
+                                onEntered: { wasteLabel.color = "#e6cb05";}
+
+                                onClicked:{
+                                    backend.wasteSleepMode()
+                                }
+                            }
+
+                        }
+                    }
+
+
+                        Rectangle {
+                            PointScale {
+
+                            }
+
+                            id: scaleTime
+                            x: 0
+                            y: 0
+                            width: 347
+                            height: 16
+                            color: "#ffffff"
+                            radius: 8
+                            Image {
+                                anchors.centerIn: parent
+                                id: scaleRuler
+                                source: "../images/other/ruler-scale.png"
+                                width: 347
+                                height: 15
+                                ColorOverlay {
+                                    anchors.fill: scaleRuler
+                                    source: scaleRuler
+                                    color: "#7a3452"
+                                }
+                            }
+
+                    }
+
                     Rectangle {
                         id: countOfLedRectengle
                         y: 176
@@ -1230,6 +1261,8 @@ Window {
 
 
                     }
+
+
 
 
 

@@ -1,4 +1,4 @@
-#define ID 0
+#define ID 1
 
 #include <SPI.h>
 #include "nRF24L01.h"
@@ -59,8 +59,8 @@ int countTimes;
 byte address[][6] = {"1Node","2Node","3Node","4Node","5Node","6Node"};  //возможные номера труб
 
 volatile boolean changeFlag;
-byte musicTheme = 5;
-byte lightTheme = 0;
+byte musicTheme = 0;
+byte lightTheme = 5;
 boolean paintTheme = false;
 boolean screenTheme = false;
 byte bright = 255;
@@ -72,6 +72,26 @@ byte amplitude = 0;
 byte minuteToSleep = 0;
 byte hourToSleep = 0;
 
+
+boolean sleep_mode = false;
+
+byte current_minute = 0;
+byte current_second = 0;
+byte current_hour = 0;
+
+byte time_off_minute = 0;
+byte time_off_hour = 0;
+
+byte time_on_minute = 0;
+byte time_on_hour = 0;
+
+byte listLightModeMinute[10] = {0,0,0,0,0,0,0,0,0,0};
+byte listLightModeHour[10] = {0,0,0,0,0,0,0,0,0,0};
+byte listLightModeCount = 0;
+
+byte listSleepModeMinute[10] = {0,0,0,0,0,0,0,0,0,0};
+byte listSleepModeHour[10] = {0,0,0,0,0,0,0,0,0,0}; 
+byte listSleepModeCount = 0;
 
 
 //struct color {
@@ -143,6 +163,10 @@ void setup(){
 
 void loop(void) {
   stay_ease();
+
+  if(listLightModeCount!=0 || listSleepModeCount!=0){
+    time_to_sleep();
+  }
    static unsigned long timeLastReceive= 0;
   byte pipeNo, gotByte;                          
     while( radio.available(&pipeNo)){    // слушаем эфир со всех труб
@@ -173,11 +197,11 @@ void loop(void) {
      }
      else if (countTimes==4){
         items[1] = number;
-        if(command == 6 )process = true;
      }
      else{
         items[countTimes-3] = (byte)number;
         if (countTimes==8 && command == 7 ) process = true;
+        if (countTimes==8 && command == 6 ) process = true;
         if (countTimes==5 && command == 5 ) process = true;
      }
      
@@ -235,8 +259,39 @@ void loop(void) {
         break;
         
         case 6:
-          minuteToSleep = items[0];
-          hourToSleep = items[1];
+        
+          current_minute = items[1];
+          current_second = 0;
+          current_hour = items[0];
+          if( items[2] == 66 && items[3] == 66){
+              listSleepModeMinute[listSleepModeCount] = items[5];
+              listSleepModeHour[listSleepModeCount] = items[4];
+              listSleepModeCount+=1;
+              listSleepModeCount= listSleepModeCount%10;
+          }
+          else if( items[4] == 66 && items[5] == 66){
+              listLightModeMinute[listLightModeCount] = items[3];
+              listLightModeHour[listLightModeCount] = items[2];
+              listLightModeCount+=1;
+              listLightModeCount= listLightModeCount%10;
+              
+          }
+          else if(items[2] == 66 && items[3] == 66 && items[4] == 66 && items[5] == 66){
+              listSleepModeCount = 0;
+              listLightModeCount = 0;
+          }
+          else{
+            listLightModeMinute[listLightModeCount] = items[5];
+            listLightModeHour[listLightModeCount] = items[4];
+            listLightModeCount+=1;
+            listLightModeCount= listLightModeCount%10;
+
+            listSleepModeMinute[listSleepModeCount] = items[3];
+            listSleepModeHour[listSleepModeCount] = items[2];
+            listSleepModeCount+=1;
+            listSleepModeCount = listSleepModeCount%10;
+          }
+          
         break;  
         case 7:
           
@@ -313,6 +368,50 @@ void stay_ease(){
   //Serial.println(bright);
   time_ease_bright=millis();
   LEDS.setBrightness(bright); 
+  }
+ 
+}
+
+void time_to_sleep(){
+  static unsigned long time_update_seconds = 0;
+  static byte last_bright = 0;
+
+  if(millis()-time_update_seconds>1000){
+  if(current_second<60)current_second++;
+  else{
+    current_second = 0;
+    if(current_minute<60) {
+      current_minute+=1;
+      
+      
+    }
+    else{
+      current_minute = 0;
+      if(current_hour<24)current_hour+=1;
+      else current_hour = 0;
+      
+    }
+    
+  }
+  if(new_bright==0 && current_second<2) {   
+    for(int i=0; i<listLightModeCount;i++){
+      if(current_minute == listLightModeMinute[i] && current_hour == listLightModeHour[i]){
+        new_bright = last_bright;
+      }
+    }
+  }
+
+  if(new_bright!=0 && current_second<2) {
+    for(int i=0; i<listSleepModeCount;i++){
+      if(current_minute == listSleepModeMinute[i] && current_hour == listSleepModeHour[i]){
+        last_bright = new_bright; 
+        new_bright = 0;
+      }
+    }
+  }
+
+  
+  time_update_seconds = millis();
   }
  
 }
